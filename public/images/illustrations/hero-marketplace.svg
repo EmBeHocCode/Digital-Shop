@@ -1,0 +1,63 @@
+<svg width="640" height="480" viewBox="0 0 640 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="84" y1="54" x2="557" y2="433" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF4FA"/>
+      <stop offset="0.5" stop-color="#F3F7FF"/>
+      <stop offset="1" stop-color="#EEF8FF"/>
+    </linearGradient>
+    <linearGradient id="pinkBlue" x1="180" y1="86" x2="442" y2="392" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF8AB0"/>
+      <stop offset="1" stop-color="#6C8CFF"/>
+    </linearGradient>
+    <linearGradient id="softBlue" x1="380" y1="157" x2="496" y2="338" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DCE6FF"/>
+      <stop offset="1" stop-color="#F5F8FF"/>
+    </linearGradient>
+    <filter id="shadow" x="82" y="72" width="476" height="352" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#7D8AA633" />
+    </filter>
+  </defs>
+  <rect x="24" y="24" width="592" height="432" rx="40" fill="url(#bg)"/>
+  <circle cx="144" cy="100" r="40" fill="#FFD7E6" fill-opacity="0.9"/>
+  <circle cx="522" cy="112" r="32" fill="#DCE6FF" fill-opacity="0.9"/>
+  <circle cx="548" cy="350" r="46" fill="#FFE8B2" fill-opacity="0.7"/>
+  <circle cx="110" cy="352" r="54" fill="#E7EEFF" fill-opacity="0.9"/>
+  <g filter="url(#shadow)">
+    <rect x="148" y="96" width="344" height="288" rx="32" fill="white" fill-opacity="0.92"/>
+    <rect x="176" y="124" width="188" height="18" rx="9" fill="#FFD6E3"/>
+    <rect x="176" y="156" width="280" height="154" rx="24" fill="url(#softBlue)"/>
+    <rect x="194" y="178" width="116" height="96" rx="18" fill="white"/>
+    <rect x="328" y="178" width="110" height="40" rx="16" fill="white"/>
+    <rect x="328" y="234" width="110" height="40" rx="16" fill="white"/>
+    <rect x="176" y="328" width="98" height="28" rx="14" fill="#FF8AB0" fill-opacity="0.18"/>
+    <rect x="286" y="328" width="98" height="28" rx="14" fill="#6C8CFF" fill-opacity="0.16"/>
+    <rect x="396" y="328" width="60" height="28" rx="14" fill="#FFD166" fill-opacity="0.22"/>
+  </g>
+  <g transform="translate(90 178)">
+    <path d="M32 66C14.3269 66 0 51.6731 0 34C0 16.3269 14.3269 2 32 2C42.7879 2 52.3291 7.33973 58.1339 15.5438C61.1099 14.5374 64.2984 14 67.6124 14C83.439 14 96.6124 26.712 97.5801 42.534C110.401 43.5341 120.5 54.2493 120.5 67.5C120.5 81.4188 109.219 92.7 95.3 92.7H32C14.3269 92.7 0 78.3731 0 60.7C0 58.8946 0.149566 57.1243 0.437317 55.4018C6.4733 62.0252 14.9574 66 24.35 66H32Z" fill="#E9F0FF"/>
+    <circle cx="38" cy="53" r="10" fill="#6C8CFF"/>
+    <circle cx="64" cy="53" r="10" fill="#FF8AB0"/>
+    <circle cx="90" cy="53" r="10" fill="#FFD166"/>
+  </g>
+  <g transform="translate(454 154)">
+    <rect x="0" y="30" width="100" height="132" rx="24" fill="url(#pinkBlue)"/>
+    <rect x="18" y="50" width="64" height="12" rx="6" fill="white" fill-opacity="0.9"/>
+    <rect x="18" y="78" width="64" height="12" rx="6" fill="white" fill-opacity="0.7"/>
+    <rect x="18" y="106" width="44" height="12" rx="6" fill="white" fill-opacity="0.7"/>
+    <circle cx="80" cy="18" r="18" fill="#FFE2EC"/>
+    <path d="M74 18H86" stroke="#FF7FA9" stroke-width="4" stroke-linecap="round"/>
+    <path d="M80 12V24" stroke="#FF7FA9" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(88 86)">
+    <path d="M28 0C39.0457 0 48 8.95431 48 20V24C48 26.2091 46.2091 28 44 28H4C1.79086 28 0 26.2091 0 24V20C0 8.95431 8.95431 0 20 0H28Z" fill="#6C8CFF"/>
+    <rect x="6" y="28" width="36" height="52" rx="12" fill="#EAF0FF"/>
+    <rect x="12" y="40" width="24" height="8" rx="4" fill="#6C8CFF" fill-opacity="0.25"/>
+    <rect x="12" y="56" width="24" height="8" rx="4" fill="#6C8CFF" fill-opacity="0.18"/>
+  </g>
+  <g transform="translate(456 310)">
+    <rect x="0" y="0" width="108" height="64" rx="24" fill="#FFE8B2"/>
+    <path d="M26 32C26 22.0589 34.0589 14 44 14H64C73.9411 14 82 22.0589 82 32V34C82 36.2091 80.2091 38 78 38H64L56 46L48 38H30C27.7909 38 26 36.2091 26 34V32Z" fill="#1F2937"/>
+    <circle cx="42" cy="28" r="4" fill="#FFE8B2"/>
+    <circle cx="66" cy="28" r="4" fill="#FFE8B2"/>
+  </g>
+</svg>

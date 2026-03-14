@@ -1,0 +1,25 @@
+<svg width="320" height="220" viewBox="0 0 320 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="32" y1="20" x2="282" y2="192" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FDF3FF"/>
+      <stop offset="0.55" stop-color="#F0F5FF"/>
+      <stop offset="1" stop-color="#EEF8FF"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="84" y1="48" x2="236" y2="152" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EAF0FF"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="12" width="296" height="196" rx="32" fill="url(#bg)"/>
+  <circle cx="60" cy="154" r="26" fill="#FFE5EE"/>
+  <circle cx="266" cy="58" r="20" fill="#E6EEFF"/>
+  <path d="M98 86C98 61.6995 117.699 42 142 42C157.146 42 170.506 49.6544 178.424 61.3082C182.039 60.4469 185.81 60 189.686 60C215.404 60 236.53 80.0954 237.991 105.452C252.28 106.566 263.5 118.488 263.5 133.058C263.5 148.381 251.076 160.806 235.753 160.806H118C95.9086 160.806 78 142.897 78 120.806C78 110.507 81.8911 101.116 88.2825 94.0225C91.361 88.6462 94.6982 86 98 86Z" fill="url(#cloud)"/>
+  <circle cx="132" cy="112" r="14" fill="#FF8AB0"/>
+  <circle cx="176" cy="96" r="14" fill="#6C8CFF"/>
+  <circle cx="210" cy="122" r="14" fill="#FFD166"/>
+  <path d="M146 108L162 100" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M186 103L199 115" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+  <path d="M132 126H210" stroke="#A7B8F6" stroke-width="4" stroke-linecap="round" stroke-dasharray="6 10"/>
+  <rect x="98" y="168" width="48" height="18" rx="9" fill="#DCE6FF"/>
+  <rect x="156" y="168" width="70" height="18" rx="9" fill="#FFD9E6"/>
+</svg>

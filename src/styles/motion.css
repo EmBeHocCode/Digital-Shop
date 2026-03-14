@@ -1,0 +1,43 @@
+.motion-surface {
+  position: relative;
+}
+
+.motion-surface::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 127, 169, 0.18), transparent 26%),
+    radial-gradient(circle at 82% 12%, rgba(108, 140, 255, 0.18), transparent 28%),
+    radial-gradient(circle at 55% 78%, rgba(255, 209, 102, 0.14), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #f7f9fc 100%);
+}
+
+.motion-surface::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.12;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)),
+    radial-gradient(circle, rgba(31, 41, 55, 0.12) 0.6px, transparent 0.8px);
+  background-size: auto, 18px 18px;
+  pointer-events: none;
+}
+
+.glass-panel {
+  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.shimmer-bg {
+  background: linear-gradient(
+    90deg,
+    rgba(226, 232, 240, 0.8) 0%,
+    rgba(255, 255, 255, 0.95) 50%,
+    rgba(226, 232, 240, 0.8) 100%
+  );
+  background-size: 200% 100%;
+}
