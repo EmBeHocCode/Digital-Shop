@@ -1,0 +1,604 @@
+﻿@import "tailwindcss";
+@import "tw-animate-css";
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+    --font-display: "Nunito", var(--font-geist-sans), system-ui, sans-serif;
+    --font-body: var(--font-geist-sans), system-ui, sans-serif;
+    --font-mono: var(--font-geist-mono), monospace;
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-sidebar: var(--sidebar);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+ :root {
+    --radius: 16px;
+    /* Duolingo-inspired Light Theme */
+    --background: #FAFAFA;
+    --foreground: #3C3C3C;
+    --card: #FFFFFF;
+    --card-foreground: #3C3C3C;
+    --card-border: #E5E5E5;
+    --popover: #FFFFFF;
+    --popover-foreground: #3C3C3C;
+    /* Primary - Neon Pink */
+    --primary: #ff006e;
+    --primary-foreground: #FFFFFF;
+    --primary-hover: #ff2a85;
+    --primary-shadow: #cc0055;
+    /* Secondary - Soft Gray */
+    --secondary: #F0F0F0;
+    --secondary-foreground: #3C3C3C;
+    /* Muted */
+    --muted: #F7F7F7;
+    --muted-foreground: #777777;
+    /* Accent - Duolingo Blue */
+    --accent: #1CB0F6;
+    --accent-foreground: #FFFFFF;
+    --accent-shadow: #1899D6;
+    /* Warning - Duolingo Orange */
+    --warning: #FF9600;
+    --warning-foreground: #FFFFFF;
+    --warning-shadow: #E68600;
+    /* Destructive - Duolingo Red */
+    --destructive: #FF4B4B;
+    --destructive-foreground: #FFFFFF;
+    --destructive-shadow: #E63E3E;
+    /* Success */
+    --success: #58CC02;
+    --success-foreground: #FFFFFF;
+    /* Purple accent */
+    --purple: #CE82FF;
+    --purple-foreground: #FFFFFF;
+    --purple-shadow: #B86EE6;
+    /* Border & Input */
+    --border: #E5E5E5;
+    --input: #E5E5E5;
+    --ring: #ff006e;
+    /* Charts - Vibrant flat colors */
+    --chart-1: #ff006e;
+    --chart-2: #1CB0F6;
+    --chart-3: #FF9600;
+    --chart-4: #CE82FF;
+    --chart-5: #FF4B4B;
+    /* Sidebar */
+    --sidebar: #FFFFFF;
+    --sidebar-foreground: #3C3C3C;
+    --sidebar-primary: #ff006e;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #F0F0F0;
+    --sidebar-accent-foreground: #3C3C3C;
+    --sidebar-border: #E5E5E5;
+    --sidebar-ring: #ff006e;
+}
+
+
+/* Animated gradient on html root — always dark, shows through transparent body/main */
+
+html {
+    color-scheme: dark;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a0a1a 25%, #0a0a1a 50%, #1a0a1a 75%, #0a0a0a 100%);
+    background-size: 400% 400%;
+    background-attachment: fixed;
+    animation: neonGradientShift 15s ease infinite;
+}
+
+.dark {
+    /* Bio-style Neon Dark Theme */
+    --background: transparent;
+    --foreground: #f0f0f0;
+    --card: #1a1a1a;
+    --card-foreground: #f0f0f0;
+    --card-border: #2a2a2a;
+    --popover: #1a1a1a;
+    --popover-foreground: #f0f0f0;
+    /* Primary - Neon Pink */
+    --primary: #ff006e;
+    --primary-foreground: #FFFFFF;
+    --primary-hover: #ff2a85;
+    --primary-shadow: #cc0055;
+    --secondary: #1a1a1a;
+    --secondary-foreground: #f0f0f0;
+    --muted: #1a1a1a;
+    --muted-foreground: #a0a0a0;
+    --accent: #ff2a85;
+    --accent-foreground: #FFFFFF;
+    --accent-shadow: #cc0055;
+    --warning: #FF9600;
+    --warning-foreground: #FFFFFF;
+    --warning-shadow: #E68600;
+    --destructive: #FF4B4B;
+    --destructive-foreground: #FFFFFF;
+    --destructive-shadow: #E63E3E;
+    --success: #58CC02;
+    --success-foreground: #FFFFFF;
+    --purple: #CE82FF;
+    --purple-foreground: #FFFFFF;
+    --border: #2a2a2a;
+    --input: #2a2a2a;
+    --ring: #ff006e;
+    --shadow-glow: 0 0 20px rgba(255, 0, 110, 0.3);
+    --shadow-glow-lg: 0 0 40px rgba(255, 0, 110, 0.4);
+    --chart-1: #ff006e;
+    --chart-2: #1CB0F6;
+    --chart-3: #FF9600;
+    --chart-4: #CE82FF;
+    --chart-5: #FF4B4B;
+    --sidebar: #111111;
+    --sidebar-foreground: #f0f0f0;
+    --sidebar-primary: #ff006e;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #1a1a1a;
+    --sidebar-accent-foreground: #f0f0f0;
+    --sidebar-border: #2a2a2a;
+    --sidebar-ring: #ff006e;
+}
+
+@layer base {
+    * {
+        border-color: var(--border);
+    }
+    html {
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    body {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-body);
+        line-height: 1.6;
+    }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+    }
+}
+
+
+/* ============================================
+   Neon Background Effects (Dark Mode)
+   ============================================ */
+
+
+/* Always visible — app is dark-only */
+
+
+/* Orbs + grid — behind all content, above html gradient */
+
+.neon-orb-container {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+
+/* Tech grid inside orb container (z-index: -1 = behind page content) */
+
+.neon-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255, 0, 110, 0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 0, 110, 0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: neonGridMove 20s linear infinite;
+}
+
+
+/* Particles — behind UI chrome (z-index: 1 keeps them below dialogs/dropdowns at z-50) */
+
+.neon-bg-container {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.neon-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ff006e;
+    border-radius: 50%;
+    opacity: 0;
+    animation: neonParticleFloat 8s infinite ease-in-out;
+    box-shadow: 0 0 10px #ff006e, 0 0 20px #ff006e;
+    pointer-events: none;
+}
+
+.neon-orb {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 0, 110, 0.3), rgba(255, 0, 110, 0.1), transparent);
+    filter: blur(40px);
+    opacity: 0.5;
+    animation: neonOrbFloat 20s infinite ease-in-out;
+    pointer-events: none;
+}
+
+.neon-orb:nth-child(1) {
+    width: 300px;
+    height: 300px;
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.neon-orb:nth-child(2) {
+    width: 400px;
+    height: 400px;
+    top: 60%;
+    right: 10%;
+    left: auto;
+    animation-delay: 5s;
+}
+
+.neon-orb:nth-child(3) {
+    width: 250px;
+    height: 250px;
+    bottom: 20%;
+    top: auto;
+    left: 50%;
+    animation-delay: 10s;
+}
+
+@keyframes neonGradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes neonGridMove {
+    0% {
+        transform: translate(0, 0);
+    }
+    100% {
+        transform: translate(50px, 50px);
+    }
+}
+
+@keyframes neonParticleFloat {
+    0% {
+        transform: translateY(100vh) translateX(0) scale(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-10vh) translateX(50px) scale(1);
+        opacity: 0;
+    }
+}
+
+@keyframes neonOrbFloat {
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+    33% {
+        transform: translate(50px, -50px) scale(1.1);
+    }
+    66% {
+        transform: translate(-30px, 30px) scale(0.9);
+    }
+}
+
+@keyframes neonRotateBorder {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.dark,
+    html.dark::after,
+    .neon-particle,
+    .neon-orb {
+        animation: none;
+    }
+    .neon-bg-container,
+    .neon-orb-container {
+        display: none;
+    }
+}
+
+@keyframes bounce-in {
+    0% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+    70% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes slide-up {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse-soft {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.animate-bounce-in {
+    animation: bounce-in 0.3s ease-out;
+}
+
+.animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    border-radius: 3px;
+}
+
+
+/* ============================================
+   Custom Neon Cursor
+   ============================================ */
+
+
+/* Hide default cursor on desktop */
+
+@media (min-width: 769px) and (hover: hover) {
+    * {
+        cursor: none !important;
+    }
+}
+
+.cursor-dot {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    background: #ffe6f0;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999;
+    transform: translate(-50%, -50%);
+    transition: width 0.2s, height 0.2s, background-color 0.2s;
+    box-shadow: 0 0 15px rgba(255, 192, 224, 0.8), 0 0 30px rgba(255, 192, 224, 0.6), 0 0 45px rgba(255, 230, 240, 0.4);
+}
+
+.cursor-ring {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 26px;
+    height: 26px;
+    border: 2px solid rgba(255, 0, 110, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99998;
+    transform: translate(-50%, -50%);
+    transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+    opacity: 0.8;
+    box-shadow: 0 0 20px rgba(255, 0, 110, 0.4), inset 0 0 15px rgba(255, 0, 110, 0.2);
+}
+
+
+/* Hover state */
+
+body.cursor-hover .cursor-dot {
+    width: 14px;
+    height: 14px;
+    background: #b3f0ff;
+    box-shadow: 0 0 20px rgba(179, 240, 255, 0.9), 0 0 40px rgba(179, 240, 255, 0.6), 0 0 60px rgba(179, 240, 255, 0.4);
+}
+
+body.cursor-hover .cursor-ring {
+    width: 38px;
+    height: 38px;
+    border-color: rgba(179, 240, 255, 0.7);
+    opacity: 1;
+    box-shadow: 0 0 25px rgba(179, 240, 255, 0.5), inset 0 0 20px rgba(179, 240, 255, 0.3);
+}
+
+
+/* Trail particles */
+
+.cursor-trail {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99997;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 0, 110, 0.8);
+    border-radius: 50%;
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(255, 0, 110, 0.7), 0 0 24px rgba(255, 0, 110, 0.4);
+    animation: trailFade 0.6s ease-out forwards;
+}
+
+@keyframes trailFade {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.3);
+    }
+}
+
+
+/* Click ripple */
+
+.cursor-click-effect {
+    position: fixed;
+    pointer-events: none;
+    z-index: 99996;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 0, 110, 0.9);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: clickRipple 0.6s ease-out forwards;
+}
+
+@keyframes clickRipple {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+        box-shadow: 0 0 15px rgba(255, 0, 110, 0.8);
+    }
+    100% {
+        width: 80px;
+        height: 80px;
+        opacity: 0;
+        border-width: 1px;
+        box-shadow: 0 0 30px rgba(255, 0, 110, 0);
+    }
+}
+
+
+/* Dot click animation */
+
+.cursor-dot.clicking {
+    animation: dotClick 0.3s ease-out;
+}
+
+@keyframes dotClick {
+    0% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(0.6);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+
+/* Light theme overrides */
+
+.cursor-dot {
+    background: #ff006e;
+    box-shadow: 0 0 15px rgba(255, 0, 110, 0.7), 0 0 30px rgba(255, 0, 110, 0.5), 0 0 45px rgba(255, 0, 110, 0.3);
+}
+
+.dark .cursor-dot {
+    background: #ffe6f0;
+    box-shadow: 0 0 15px rgba(255, 192, 224, 0.8), 0 0 30px rgba(255, 192, 224, 0.6), 0 0 45px rgba(255, 230, 240, 0.4);
+}
+
+
+/* Mobile: restore default cursor */
+
+@media (max-width: 768px),
+(hover: none) {
+    .cursor-dot,
+    .cursor-ring,
+    .cursor-trail,
+    .cursor-click-effect {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cursor-dot,
+    .cursor-ring,
+    .cursor-trail,
+    .cursor-click-effect {
+        display: none !important;
+    }
+}
