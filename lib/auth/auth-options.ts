@@ -5,7 +5,7 @@ import { getPrismaClient } from "@/lib/db/prisma"
 import { signInSchema } from "@/features/auth/validations"
 import { verifyHumanVerification } from "@/lib/auth/human-verification"
 
-type SessionRole = "USER" | "ADMIN"
+type SessionRole = "CUSTOMER" | "STAFF" | "MANAGER" | "ADMIN" | "SUPERADMIN"
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.AUTH_SECRET ?? process.env.NEXTAUTH_SECRET,
@@ -96,7 +96,7 @@ export const authOptions: NextAuthOptions = {
             name: user.name,
             image: user.image,
             phone: user.phone,
-            role: user.role,
+            role: user.role as SessionRole,
           }
         } catch (error) {
           if (process.env.NODE_ENV === "development") {
@@ -111,7 +111,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.role = (user as typeof user & { role?: SessionRole }).role ?? "USER"
+        token.role = (user as typeof user & { role?: SessionRole }).role ?? "CUSTOMER"
         token.name = user.name ?? token.name
         token.email = user.email ?? token.email
         token.picture = user.image ?? token.picture
@@ -139,7 +139,7 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub ?? ""
-        session.user.role = (token.role as SessionRole | undefined) ?? "USER"
+        session.user.role = (token.role as SessionRole | undefined) ?? "CUSTOMER"
         session.user.name = token.name ?? session.user.name
         session.user.email = token.email ?? session.user.email
         session.user.image = typeof token.picture === "string" ? token.picture : session.user.image

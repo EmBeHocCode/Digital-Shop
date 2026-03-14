@@ -97,11 +97,7 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
 
         <Form {...form}>
           <form className="space-y-5" onSubmit={form.handleSubmit(handleSubmit)}>
-            <input
-              {...form.register("humanToken")}
-              type="hidden"
-              value={form.watch("humanToken")}
-            />
+            <input {...form.register("humanToken")} type="hidden" />
             <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden">
               <label htmlFor="website">Website</label>
               <input

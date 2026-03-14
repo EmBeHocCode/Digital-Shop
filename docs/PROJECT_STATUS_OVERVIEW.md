@@ -1,6 +1,6 @@
 # Project Status Overview
 
-Last updated: 2026-03-14
+Last updated: 2026-03-15
 
 ## Summary
 
@@ -68,6 +68,32 @@ Chiến lược triển khai đến hiện tại là refactor tăng dần theo p
   - `getBusinessIntelligenceContext`
 - không rewrite UI hiện tại; các service mới đều giữ fallback an toàn khi DB chưa sẵn sàng
 
+### Phase 8
+
+- thêm dashboard profile page:
+  - `/dashboard/profile`
+- hoàn thiện order detail page:
+  - `/dashboard/orders/[orderId]`
+- thêm purchased product detail page:
+  - `/dashboard/purchased-products/[productId]`
+- thêm reusable detail UI blocks cho dashboard:
+  - status badge
+  - metadata card
+  - pricing breakdown card
+  - configuration summary card
+  - detail page skeleton
+- nối navigation từ:
+  - dashboard overview
+  - orders list
+  - purchased products list
+  - sidebar footer user card
+- refactor parser cho `OrderItem.metadata` để đọc lại cấu hình đã persist
+- dọn quality gate repo:
+  - exclude `src/` legacy khỏi `tsc`
+  - exclude `scripts/` khỏi `eslint`
+  - xóa `postcss.config.js` cũ
+  - đổi `middleware.ts` sang `proxy.ts` theo Next 16 convention
+
 ## Current website map
 
 ### Public pages
@@ -89,9 +115,12 @@ Chiến lược triển khai đến hiện tại là refactor tăng dần theo p
 ### Protected pages
 
 - `/dashboard`
+- `/dashboard/profile`
 - `/dashboard/orders`
+- `/dashboard/orders/[orderId]`
 - `/dashboard/wallet`
 - `/dashboard/purchased-products`
+- `/dashboard/purchased-products/[productId]`
 - `/dashboard/billing`
 - `/dashboard/settings`
 
@@ -254,7 +283,20 @@ Mỗi page hiện có:
 - orders table
 - payment status badges
 - product name summary trên từng đơn
+- CTA sang order detail page
 - empty state
+
+#### `/dashboard/orders/[orderId]`
+
+- order summary hero
+- order status + payment status
+- purchased items list
+- pricing breakdown
+- payment instructions
+- customer info + timestamps
+- transaction list
+- persisted product configuration display
+- not-found / unauthorized empty state
 
 #### `/dashboard/wallet`
 
@@ -269,7 +311,18 @@ Mỗi page hiện có:
 - purchased products grouped theo domain
 - service summary cards
 - total spent / order count / last purchased info
-- CTA quay lại service detail và orders
+- CTA quay lại service detail, orders, và purchased product detail
+
+#### `/dashboard/purchased-products/[productId]`
+
+- product hậu mua summary
+- domain badge + latest lifecycle state
+- service provisioning summary cho infrastructure products
+- delivery record summary cho digital goods / telecom
+- latest persisted configuration block
+- line item history linked về order detail
+- pricing / commerce summary
+- not-found / unauthorized empty state
 
 #### `/dashboard/billing`
 
@@ -286,6 +339,16 @@ Mỗi page hiện có:
 - security posture card
 - preferences placeholder card
 - account summary card
+
+#### `/dashboard/profile`
+
+- account overview hero
+- avatar + name + role + active state
+- wallet / billing / order metrics
+- contact info card
+- user preferences card
+- account activity summary
+- embedded profile editing form
 
 ## Completed phases
 
@@ -688,6 +751,56 @@ Outcome:
 - web hiện tại vẫn hoạt động ổn vì chưa ép rewrite database-first
 - local/dev vẫn an toàn nhờ fallback khi chưa có PostgreSQL live
 
+### Phase 8: Dashboard detail pages + repo quality gate cleanup
+
+Goal:
+
+- làm dashboard/account area đầy đủ hơn cho end user
+- thêm các route chi tiết cần thiết mà không rewrite dashboard shell hiện có
+- dọn quality gate để lint / typecheck / build phản ánh đúng app đang ship
+
+What was done:
+
+- build `/dashboard/profile`
+- hoàn thiện `/dashboard/orders/[orderId]`
+- build `/dashboard/purchased-products/[productId]`
+- thêm reusable dashboard detail components:
+  - `DetailStatusBadge`
+  - `DetailMetadataCard`
+  - `PricingBreakdownCard`
+  - `ConfigurationSummaryCard`
+  - `DetailPageSkeleton`
+- thêm service:
+  - `getPurchasedProductDetail`
+- tách parser cho `OrderItem.metadata`
+- nối link điều hướng từ overview, orders list, purchased products list, và sidebar footer
+- dọn repo config:
+  - exclude `src/` legacy khỏi TypeScript
+  - exclude `scripts/` khỏi ESLint
+  - xóa `postcss.config.js` cũ
+  - đổi `middleware.ts` thành `proxy.ts`
+
+Pages/routes added in Phase 8:
+
+- `/dashboard/profile`
+- `/dashboard/orders/[orderId]`
+- `/dashboard/purchased-products/[productId]`
+
+Main features delivered:
+
+- hồ sơ user-facing riêng trong dashboard
+- order detail page đọc dữ liệu thật và cấu hình đã persist
+- purchased product detail page cho hậu mua
+- empty/loading states nhất quán hơn cho account area
+- navigation dashboard/account hoàn chỉnh hơn
+- quality gates của repo được đưa về trạng thái pass ổn định
+
+Outcome:
+
+- dashboard/account area bớt cảm giác shell demo, tiến gần hơn một user workspace hoàn chỉnh
+- order và purchased product flows đã có trang detail thực tế
+- repo hiện pass `lint`, `tsc`, `build` sau khi dọn legacy config gây nhiễu
+
 ## Phase summary
 
 - Phase 1: refactor vừa đủ + public services catalog
@@ -697,6 +810,7 @@ Outcome:
 - Phase 5: real order flow + wallet flow + payment foundation
 - Phase 6: product configurator + purchased products / billing / settings UI
 - Phase 7: AI-ready data foundation + commerce schema expansion
+- Phase 8: dashboard profile + detail pages + quality gate cleanup
 
 ## Current technical status
 
@@ -707,6 +821,7 @@ Outcome:
 - public site vẫn hoạt động
 - auth pages đã hoạt động
 - dashboard đã được bảo vệ bằng session
+- dashboard hiện có profile page và detail pages cho orders / purchased products
 - services catalog vẫn hoạt động
 - catalog có fallback an toàn nếu DB chưa sẵn sàng
 - seed command đã có nhưng chưa bắt buộc phải chạy để UI hoạt động
@@ -716,7 +831,7 @@ Outcome:
 
 - migrate / push schema vào PostgreSQL thật nếu muốn dùng DB live
 - chạy seed vào database thật
-- persist product configuration vào schema riêng nếu muốn lưu sâu hơn ở level `OrderItem`
+- persist product configuration vào bảng/query layer riêng nếu muốn analytics sâu hơn ngoài `OrderItem.metadata`
 - wallet top-up settlement thật
 - admin/product management
 - payment integration thật
@@ -727,14 +842,13 @@ Outcome:
 
 ## Recommended next phases
 
-### Phase 7
+### Phase 9
 
 - apply schema mới vào PostgreSQL thật
 - seed database thật bằng `db:seed`
 - nối dần landing/product/cart runtime sang service layer mới
 - thêm AI chat/API dùng `getBusinessIntelligenceContext`
 - thêm admin/product management có role gating
-- order detail page riêng
 - invoice history / export
 - payment provider thật như Stripe hoặc VNPay
 

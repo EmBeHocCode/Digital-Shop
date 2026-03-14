@@ -7,7 +7,7 @@ import type { User } from "@/types/domain";
 
 export async function getCurrentSessionUser() {
   const cookieStore = cookies();
-  const role = cookieStore.get("meowmarket-role")?.value as "USER" | "STAFF" | "ADMIN" | undefined;
+  const role = cookieStore.get("meowmarket-role")?.value as "CUSTOMER" | "STAFF" | "MANAGER" | "ADMIN" | "SUPERADMIN" | undefined;
   const parsedCookieUser = parseSessionUser(cookieStore.get("meowmarket-user")?.value);
 
   if (parsedCookieUser?.email) {

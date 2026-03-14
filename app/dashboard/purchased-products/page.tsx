@@ -131,6 +131,9 @@ export default async function DashboardPurchasedProductsPage() {
                     <Link href={`/services/${product.slug}`}>Xem lại sản phẩm</Link>
                   </Button>
                   <Button asChild variant="outline">
+                    <Link href={`/dashboard/purchased-products/${product.productId}`}>Chi tiết hậu mua</Link>
+                  </Button>
+                  <Button asChild variant="outline">
                     <Link href="/dashboard/orders">Theo dõi đơn hàng</Link>
                   </Button>
                 </div>

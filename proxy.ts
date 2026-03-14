@@ -6,7 +6,7 @@ const protectedRoutes = [
   { prefix: "/admin", roles: ["ADMIN"] }
 ];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname, searchParams } = request.nextUrl;
   const matchedRoute = protectedRoutes.find((route) =>
     pathname.startsWith(route.prefix)

@@ -18,7 +18,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { dashboardNavigation } from "@/features/dashboard/data/dashboard-data"
+import { getNavigationForRole, dashboardPages } from "@/features/dashboard/data/dashboard-data"
 
 export function DashboardSidebar() {
   const { data: session } = useSession()
@@ -32,6 +32,8 @@ export function DashboardSidebar() {
     .slice(0, 2)
     .map((value) => value[0]?.toUpperCase())
     .join("")
+
+  const navigationItems = getNavigationForRole(session?.user?.role)
 
   return (
     <Sidebar collapsible="icon">
@@ -55,7 +57,7 @@ export function DashboardSidebar() {
 
       <SidebarContent>
         {["Workspace", "Commerce"].map((group) => {
-          const items = dashboardNavigation.filter((item) => item.group === group)
+          const items = navigationItems.filter((item) => item.group === group)
 
           if (items.length === 0) {
             return null
@@ -94,17 +96,19 @@ export function DashboardSidebar() {
       <SidebarFooter className="border-t border-sidebar-border">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg">
+            <SidebarMenuButton asChild size="lg">
+              <Link href={dashboardPages.profile.href}>
                 <Avatar className="size-8 rounded-lg">
                   <AvatarImage src="/placeholder-user.jpg" alt={userName} />
                   <AvatarFallback className="rounded-lg bg-foreground/10 text-foreground">
                     {userInitials || "NU"}
                   </AvatarFallback>
                 </Avatar>
-              <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">{userName}</span>
-                <span className="truncate text-xs text-muted-foreground">{userEmail}</span>
-              </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-semibold">{userName}</span>
+                  <span className="truncate text-xs text-muted-foreground">{userEmail}</span>
+                </div>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

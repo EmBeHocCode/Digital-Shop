@@ -1,4 +1,6 @@
+import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Empty,
@@ -84,6 +86,7 @@ export default async function DashboardOrdersPage() {
               <TableHead>Thanh toán</TableHead>
               <TableHead>Đơn hàng</TableHead>
               <TableHead>Phương thức</TableHead>
+              <TableHead>Chi tiết</TableHead>
               <TableHead className="text-right">Tổng tiền</TableHead>
             </TableRow>
           </TableHeader>
@@ -109,6 +112,11 @@ export default async function DashboardOrdersPage() {
                   <Badge variant="outline">{order.status}</Badge>
                 </TableCell>
                 <TableCell>{getPaymentMethodLabel(order.paymentMethod)}</TableCell>
+                <TableCell>
+                  <Button asChild size="sm" variant="outline">
+                    <Link href={`/dashboard/orders/${order.id}`}>Mở chi tiết</Link>
+                  </Button>
+                </TableCell>
                 <TableCell className="text-right font-semibold">{order.totalAmountLabel}</TableCell>
               </TableRow>
             ))}

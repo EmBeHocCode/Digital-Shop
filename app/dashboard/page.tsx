@@ -102,7 +102,12 @@ export default async function DashboardPage() {
                       {formatDateTime(order.createdAt)}
                     </p>
                   </div>
-                  <div className="text-sm font-semibold">{order.totalAmountLabel}</div>
+                  <div className="flex items-center gap-3">
+                    <div className="text-sm font-semibold">{order.totalAmountLabel}</div>
+                    <Button asChild size="sm" variant="outline">
+                      <Link href={`/dashboard/orders/${order.id}`}>Chi tiết</Link>
+                    </Button>
+                  </div>
                 </div>
               ))
             ) : (
@@ -204,6 +209,11 @@ export default async function DashboardPage() {
                   <p className="mt-2 text-sm text-muted-foreground">
                     {product.category} • Chi tiêu {product.totalSpentLabel}
                   </p>
+                  <Button asChild className="mt-4" size="sm" variant="outline">
+                    <Link href={`/dashboard/purchased-products/${product.productId}`}>
+                      Xem chi tiết
+                    </Link>
+                  </Button>
                 </div>
               ))
             ) : (
@@ -213,9 +223,14 @@ export default async function DashboardPage() {
             )}
           </CardContent>
           <CardContent className="pt-0">
-            <Button asChild variant="outline">
-              <Link href="/dashboard/purchased-products">Mở purchased products</Link>
-            </Button>
+            <div className="flex flex-wrap gap-3">
+              <Button asChild variant="outline">
+                <Link href="/dashboard/purchased-products">Mở purchased products</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/profile">Mở hồ sơ tài khoản</Link>
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

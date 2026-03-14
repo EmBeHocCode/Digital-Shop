@@ -1,10 +1,12 @@
 import type { LucideIcon } from "lucide-react"
+import type { UserRole } from "@/lib/auth/role-helpers"
 import {
   BadgeDollarSign,
   BarChart3,
   Boxes,
   ReceiptText,
   Settings2,
+  UserRound,
   Wallet,
 } from "lucide-react"
 
@@ -15,6 +17,7 @@ export interface DashboardPageContent {
   href: string
   icon: LucideIcon
   group: "Workspace" | "Commerce"
+  requiredRoles?: UserRole[]
 }
 
 export const dashboardPages = {
@@ -25,6 +28,16 @@ export const dashboardPages = {
     href: "/dashboard",
     icon: BarChart3,
     group: "Workspace",
+    requiredRoles: ["CUSTOMER"],
+  },
+  profile: {
+    title: "Profile",
+    heading: "Hồ sơ tài khoản",
+    description: "Tổng quan tài khoản, thông tin liên hệ và các thiết lập cá nhân đang dùng trên marketplace.",
+    href: "/dashboard/profile",
+    icon: UserRound,
+    group: "Workspace",
+    requiredRoles: ["CUSTOMER"],
   },
   orders: {
     title: "Orders",
@@ -33,6 +46,7 @@ export const dashboardPages = {
     href: "/dashboard/orders",
     icon: ReceiptText,
     group: "Commerce",
+    requiredRoles: ["CUSTOMER"],
   },
   wallet: {
     title: "Wallet",
@@ -41,6 +55,7 @@ export const dashboardPages = {
     href: "/dashboard/wallet",
     icon: Wallet,
     group: "Commerce",
+    requiredRoles: ["CUSTOMER"],
   },
   purchasedProducts: {
     title: "Purchased",
@@ -49,6 +64,7 @@ export const dashboardPages = {
     href: "/dashboard/purchased-products",
     icon: Boxes,
     group: "Commerce",
+    requiredRoles: ["CUSTOMER"],
   },
   billing: {
     title: "Billing",
@@ -57,6 +73,7 @@ export const dashboardPages = {
     href: "/dashboard/billing",
     icon: BadgeDollarSign,
     group: "Commerce",
+    requiredRoles: ["CUSTOMER"],
   },
   settings: {
     title: "Settings",
@@ -65,10 +82,24 @@ export const dashboardPages = {
     href: "/dashboard/settings",
     icon: Settings2,
     group: "Workspace",
+    requiredRoles: ["CUSTOMER"],
   },
 } satisfies Record<string, DashboardPageContent>
 
 export const dashboardNavigation = Object.values(dashboardPages)
+
+/**
+ * Get allowed navigation items for a specific role
+ */
+export function getNavigationForRole(role?: string): DashboardPageContent[] {
+  if (!role) return []
+
+  return dashboardNavigation.filter((item) => {
+    if (!item.requiredRoles || item.requiredRoles.length === 0) return true
+    const itemRequiredRoles: string[] = item.requiredRoles
+    return itemRequiredRoles.includes(role)
+  })
+}
 
 export function getDashboardPageMeta(pathname: string) {
   if (pathname === dashboardPages.overview.href) {
