@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     email: body.email as string,
     phone: body.phone as string,
     password: body.password as string,
-    role: "USER"
+    role: "CUSTOMER"
   });
 
   if ("error" in result) {
