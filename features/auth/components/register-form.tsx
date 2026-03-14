@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn } from "next-auth/react"
+import { getSession, signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { registerSchema, type RegisterInput } from "@/features/auth/validations"
+import { resolvePostAuthPath } from "@/lib/auth/role-helpers"
 
 interface RegisterFormProps {
   callbackUrl: string
@@ -82,7 +83,13 @@ export function RegisterForm({ callbackUrl }: RegisterFormProps) {
         return
       }
 
-      router.push(signInResult.url ?? callbackUrl)
+      const session = await getSession()
+      const redirectPath = resolvePostAuthPath(
+        session?.user?.role,
+        signInResult.url ?? callbackUrl
+      )
+
+      router.push(redirectPath)
       router.refresh()
     })
   }

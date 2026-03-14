@@ -8,6 +8,7 @@ import { CartLink } from "@/features/cart/components/cart-link"
 import { AppLogo } from "@/components/shared/app-logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
+import { canAccessManagementDashboard } from "@/lib/auth/role-helpers"
 
 const navigation = [
   { name: "Sản phẩm", href: "/services" },
@@ -19,8 +20,9 @@ const navigation = [
 export function PublicHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { status } = useSession()
+  const { data: session, status } = useSession()
   const isAuthenticated = status === "authenticated"
+  const canOpenDashboard = canAccessManagementDashboard(session?.user?.role)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10)
@@ -56,6 +58,7 @@ export function PublicHeader() {
             <Link
               key={item.name}
               href={item.href}
+              prefetch={item.href === "/services" ? false : undefined}
               className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {item.name}
@@ -68,12 +71,14 @@ export function PublicHeader() {
           <CartLink />
           {isAuthenticated ? (
             <>
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/dashboard">
-                  <LayoutDashboard className="size-4" />
-                  Dashboard
-                </Link>
-              </Button>
+              {canOpenDashboard ? (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard className="size-4" />
+                    Dashboard
+                  </Link>
+                </Button>
+              ) : null}
               <Button onClick={handleSignOut} size="sm" variant="outline">
                 <LogOut className="size-4" />
                 Đăng xuất
@@ -112,6 +117,7 @@ export function PublicHeader() {
                 <Link
                   key={item.name}
                   href={item.href}
+                  prefetch={item.href === "/services" ? false : undefined}
                   className="block rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                   onClick={() => setMobileMenuOpen(false)}
                 >
@@ -124,11 +130,13 @@ export function PublicHeader() {
               <CartLink />
               {isAuthenticated ? (
                 <>
-                  <Button variant="outline" className="w-full" asChild>
-                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                      Dashboard
-                    </Link>
-                  </Button>
+                  {canOpenDashboard ? (
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                        Dashboard
+                      </Link>
+                    </Button>
+                  ) : null}
                   <Button
                     className="w-full"
                     onClick={() => {

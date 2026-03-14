@@ -1,5 +1,3 @@
-import "server-only";
-
 export type UserRole = "CUSTOMER" | "STAFF" | "MANAGER" | "ADMIN" | "SUPERADMIN";
 
 export const ROLE_HIERARCHY = {
@@ -19,6 +17,41 @@ export const CUSTOMER_ROLES: UserRole[] = ["CUSTOMER"];
 export function canAccessManagementDashboard(role?: UserRole | null): boolean {
   if (!role) return false;
   return MANAGEMENT_ROLES.includes(role);
+}
+
+export function getDefaultSignedInPath(role?: UserRole | null): string {
+  return canAccessManagementDashboard(role) ? "/dashboard" : "/";
+}
+
+export function normalizeRedirectPath(input?: string | null): string {
+  if (!input) {
+    return "/";
+  }
+
+  try {
+    const url = new URL(input, "http://localhost");
+    return `${url.pathname}${url.search}${url.hash}` || "/";
+  } catch {
+    return "/";
+  }
+}
+
+export function resolvePostAuthPath(
+  role?: UserRole | null,
+  requestedPath?: string | null
+): string {
+  const normalizedPath = normalizeRedirectPath(requestedPath);
+  const defaultPath = getDefaultSignedInPath(role);
+
+  if (normalizedPath === "/login" || normalizedPath === "/register") {
+    return defaultPath;
+  }
+
+  if (normalizedPath.startsWith("/dashboard") && !canAccessManagementDashboard(role)) {
+    return "/";
+  }
+
+  return normalizedPath || defaultPath;
 }
 
 /**

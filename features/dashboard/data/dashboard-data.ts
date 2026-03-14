@@ -8,6 +8,7 @@ import {
   Settings2,
   UserRound,
   Wallet,
+  Database,
 } from "lucide-react"
 
 export interface DashboardPageContent {
@@ -83,6 +84,15 @@ export const dashboardPages = {
     icon: Settings2,
     group: "Workspace",
     requiredRoles: ["CUSTOMER"],
+  },
+  sqlManager: {
+    title: "SQL Manager",
+    heading: "Database Manager",
+    description: "Browse and manage database tables, view data, and execute queries.",
+    href: "/dashboard/admin/sql-manager",
+    icon: Database,
+    group: "Workspace",
+    requiredRoles: ["ADMIN"],
   },
 } satisfies Record<string, DashboardPageContent>
 

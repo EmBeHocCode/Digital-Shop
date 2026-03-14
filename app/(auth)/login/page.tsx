@@ -11,12 +11,12 @@ interface LoginPageProps {
 
 export const metadata: Metadata = {
   title: "Đăng nhập | NexCloud",
-  description: "Đăng nhập vào NexCloud để truy cập dashboard, lịch sử đơn hàng và ví.",
+  description: "Đăng nhập vào NexCloud để tiếp tục mua hàng và truy cập khu vực quản lý nếu tài khoản có quyền.",
 }
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const resolvedSearchParams = await searchParams
-  const callbackUrl = resolvedSearchParams.callbackUrl || "/dashboard"
+  const callbackUrl = resolvedSearchParams.callbackUrl || "/"
   const challenge = createHumanVerificationChallenge()
 
   return (
@@ -24,7 +24,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       alternateHref={`/register?callbackUrl=${encodeURIComponent(callbackUrl)}`}
       alternateLabel="Tạo tài khoản"
       alternateText="Bạn chưa có tài khoản?"
-      description="Đăng nhập để theo dõi đơn hàng, ví và dashboard. Luồng này giữ nguyên design language hiện tại nhưng đã nối vào Auth.js thật."
+      description="Đăng nhập để tiếp tục trên trang chủ, theo dõi luồng mua hàng, và mở dashboard nếu tài khoản có quyền quản lý."
       title="Đăng nhập vào NexCloud"
     >
       <LoginForm callbackUrl={callbackUrl} challenge={challenge} />

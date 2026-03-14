@@ -5,6 +5,7 @@ import { AppLogo } from "@/components/shared/app-logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { getAuthSession } from "@/lib/auth"
+import { getDefaultSignedInPath } from "@/lib/auth/role-helpers"
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -14,7 +15,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
   const session = await getAuthSession()
 
   if (session?.user?.id) {
-    redirect("/dashboard")
+    redirect(getDefaultSignedInPath(session.user.role))
   }
 
   return (

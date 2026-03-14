@@ -4,7 +4,7 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { signIn } from "next-auth/react"
+import { getSession, signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { AlertCircle, Loader2, RefreshCw, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -22,6 +22,7 @@ import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { signInSchema, type SignInInput } from "@/features/auth/validations"
 import type { HumanVerificationChallenge } from "@/lib/auth/human-verification"
+import { resolvePostAuthPath } from "@/lib/auth/role-helpers"
 
 interface LoginFormProps {
   callbackUrl: string
@@ -73,7 +74,10 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
         return
       }
 
-      router.push(result.url ?? callbackUrl)
+      const session = await getSession()
+      const redirectPath = resolvePostAuthPath(session?.user?.role, result.url ?? callbackUrl)
+
+      router.push(redirectPath)
       router.refresh()
     })
   }
@@ -83,7 +87,7 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
       <CardHeader className="space-y-3">
         <CardTitle className="text-2xl">Đăng nhập</CardTitle>
         <CardDescription>
-          Tiếp tục để truy cập dashboard, lịch sử đơn hàng và ví của bạn.
+          Tiếp tục để quay về trang chủ hoặc mở dashboard nếu tài khoản của bạn có quyền quản lý.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -232,7 +236,7 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
                   Đang đăng nhập
                 </>
               ) : (
-                "Vào dashboard"
+                "Đăng nhập"
               )}
             </Button>
           </form>

@@ -1,6 +1,5 @@
-import Link from "next/link"
-import { ArrowRight, ShoppingBag } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { ArrowRight } from "lucide-react"
+import { HeroActions } from "@/features/landing/components/hero-actions"
 
 export function Hero() {
   return (
@@ -30,20 +29,7 @@ export function Hero() {
             Nền tảng marketplace kỹ thuật số toàn diện — VPS, Cloud Server, Game Card, Giftcard, SIM số và dịch vụ viễn thông Viettel, Vinaphone, Mobifone. Kích hoạt ngay tức thì, thanh toán an toàn.
           </p>
 
-          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button size="lg" className="px-8 text-base h-12" asChild>
-              <Link href="/dashboard">
-                Bắt đầu ngay
-                <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" className="px-8 text-base h-12" asChild>
-              <Link href="/services">
-                <ShoppingBag className="mr-2 size-4" />
-                Xem dịch vụ
-              </Link>
-            </Button>
-          </div>
+          <HeroActions />
         </div>
 
         {/* Stats */}
