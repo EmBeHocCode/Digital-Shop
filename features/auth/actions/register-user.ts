@@ -1,11 +1,14 @@
 import { Prisma } from "@prisma/client"
 import { hashPassword } from "@/lib/auth/password"
 import { getPrismaClient } from "@/lib/db/prisma"
+import { issueEmailVerification } from "@/features/auth/services/email-verification"
 import { registerSchema, type RegisterInput } from "@/features/auth/validations"
 
 export interface RegisterUserSuccess {
   success: true
   userId: string
+  email: string
+  verificationEmailSent: boolean
 }
 
 export interface RegisterUserFailure {
@@ -21,7 +24,24 @@ function getFirstValidationMessage(error: Prisma.JsonObject | undefined) {
   return error ? "Dữ liệu đăng ký chưa hợp lệ." : null
 }
 
-export async function registerUser(input: RegisterInput): Promise<RegisterUserResult> {
+function isDatabaseUnavailableError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientInitializationError) {
+    return true
+  }
+
+  if (typeof error !== "object" || error === null || !("code" in error)) {
+    return false
+  }
+
+  const code = String(error.code)
+
+  return ["P1001", "ECONNREFUSED", "ECONNRESET", "ENOTFOUND", "ETIMEDOUT"].includes(code)
+}
+
+export async function registerUser(
+  input: RegisterInput,
+  request?: Request | null
+): Promise<RegisterUserResult> {
   const parsedInput = registerSchema.safeParse(input)
 
   if (!parsedInput.success) {
@@ -80,9 +100,27 @@ export async function registerUser(input: RegisterInput): Promise<RegisterUserRe
       return createdUser
     })
 
+    let verificationEmailSent = false
+
+    try {
+      const verificationDelivery = await issueEmailVerification({
+        userId: user.id,
+        email,
+        name: parsedInput.data.name.trim(),
+        request,
+      })
+      verificationEmailSent = verificationDelivery.delivered
+    } catch (error) {
+      if (process.env.NODE_ENV === "development") {
+        console.error("Verification email dispatch failed", error)
+      }
+    }
+
     return {
       success: true,
       userId: user.id,
+      email,
+      verificationEmailSent,
     }
   } catch (error) {
     if (
@@ -97,13 +135,7 @@ export async function registerUser(input: RegisterInput): Promise<RegisterUserRe
       }
     }
 
-    if (
-      error instanceof Prisma.PrismaClientInitializationError ||
-      (typeof error === "object" &&
-        error !== null &&
-        "code" in error &&
-        error.code === "P1001")
-    ) {
+    if (isDatabaseUnavailableError(error)) {
       return {
         success: false,
         status: 503,

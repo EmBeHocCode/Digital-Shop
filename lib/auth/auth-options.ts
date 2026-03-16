@@ -73,12 +73,21 @@ export const authOptions: NextAuthOptions = {
               phone: true,
               role: true,
               isActive: true,
+              emailVerified: true,
               passwordHash: true,
             },
           })
 
-          if (!user || !user.isActive || !user.passwordHash) {
+          if (!user || !user.passwordHash) {
             return null
+          }
+
+          if (!user.isActive) {
+            throw new Error("ACCOUNT_INACTIVE")
+          }
+
+          if (!user.emailVerified) {
+            throw new Error("EMAIL_NOT_VERIFIED")
           }
 
           const isPasswordValid = await verifyPassword(
@@ -99,6 +108,13 @@ export const authOptions: NextAuthOptions = {
             role: user.role as SessionRole,
           }
         } catch (error) {
+          if (
+            error instanceof Error &&
+            (error.message === "EMAIL_NOT_VERIFIED" || error.message === "ACCOUNT_INACTIVE")
+          ) {
+            throw error
+          }
+
           if (process.env.NODE_ENV === "development") {
             console.error("Credentials authorization failed", error)
           }

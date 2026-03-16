@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useSession } from "next-auth/react"
 import { useForm } from "react-hook-form"
@@ -29,6 +29,7 @@ import { useCartStore } from "@/store/use-cart-store"
 
 export function CheckoutPageContent() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
   const [isPending, startTransition] = useTransition()
   const hasPrefilledRef = useRef(false)
@@ -40,6 +41,7 @@ export function CheckoutPageContent() {
     () => items.reduce((total, item) => total + item.priceValue * item.quantity, 0),
     [items]
   )
+  const paymentQueryState = searchParams.get("payment")
 
   const form = useForm<CheckoutInput>({
     resolver: zodResolver(checkoutSchema),
@@ -94,14 +96,28 @@ export function CheckoutPageContent() {
         | {
             success?: boolean
             message?: string
+            payment?: {
+              type?: "redirect"
+              provider?: "stripe"
+              redirectUrl?: string
+            }
             order?: {
               id: string
               reference: string
               createdAt: string
               status: string
               paymentMethod: CheckoutInput["paymentMethod"]
-              paymentProvider: "internal_wallet" | "manual_bank_transfer" | "manual_review"
-              paymentStatus: "pending" | "succeeded" | "requires_action" | "failed"
+              paymentProvider:
+                | "internal_wallet"
+                | "manual_bank_transfer"
+                | "manual_review"
+                | "stripe"
+              paymentStatus:
+                | "pending"
+                | "succeeded"
+                | "requires_action"
+                | "failed"
+                | "canceled"
               paymentInstructions: {
                 title: string
                 lines: string[]
@@ -122,6 +138,11 @@ export function CheckoutPageContent() {
 
       if (!response.ok || !payload?.success || !payload.order) {
         setFormError(payload?.message ?? "Không thể tạo đơn hàng lúc này.")
+        return
+      }
+
+      if (payload.payment?.type === "redirect" && payload.payment.redirectUrl) {
+        window.location.assign(payload.payment.redirectUrl)
         return
       }
 
@@ -201,13 +222,23 @@ export function CheckoutPageContent() {
                     <AlertTitle>Không thể tạo đơn hàng</AlertTitle>
                     <AlertDescription>{formError}</AlertDescription>
                   </Alert>
+                ) : paymentQueryState === "cancelled" ? (
+                  <Alert>
+                    <Info className="size-4" />
+                    <AlertTitle>Phiên thanh toán đã bị huỷ</AlertTitle>
+                    <AlertDescription>
+                      Bạn vừa quay lại từ provider thanh toán trước khi hoàn tất. Bạn có thể kiểm tra lại
+                      giỏ hàng và thử thanh toán lại.
+                    </AlertDescription>
+                  </Alert>
                 ) : (
                   <Alert>
                     <Info className="size-4" />
-                    <AlertTitle>Payment foundation</AlertTitle>
+                    <AlertTitle>Payment lifecycle</AlertTitle>
                     <AlertDescription>
-                      Wallet payment sẽ trừ số dư atomically. Bank transfer và manual confirmation
-                      giữ đơn ở trạng thái pending để sẵn sàng cho gateway thật trong phase sau.
+                      Wallet payment sẽ trừ số dư atomically. Thanh toán thẻ sẽ chuyển sang Stripe
+                      Checkout thật nếu provider đã được cấu hình. Chuyển khoản và xác nhận thủ công
+                      vẫn giữ đơn ở trạng thái pending để đối soát.
                     </AlertDescription>
                   </Alert>
                 )}

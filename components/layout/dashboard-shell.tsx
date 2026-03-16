@@ -18,10 +18,10 @@ export function DashboardShell({ children }: DashboardShellProps) {
   return (
     <SidebarProvider>
       <DashboardSidebar />
-      <SidebarInset>
+      <SidebarInset className="min-w-0">
         <DashboardHeader currentPage={currentPage.title} />
-        <main className="flex-1 overflow-auto">
-          <div className="flex flex-col gap-6 p-6">
+        <main className="min-w-0 flex-1 overflow-auto">
+          <div className="flex min-w-0 flex-col gap-6 p-4 md:p-6">
             <div className="flex flex-col gap-2">
               <h1 className="text-3xl font-bold tracking-tight">{currentPage.heading}</h1>
               <p className="text-muted-foreground">{currentPage.description}</p>

@@ -13,6 +13,7 @@ import {
 import { getAuthSession } from "@/lib/auth"
 import { formatDateTime } from "@/lib/utils"
 import { getBillingOverview } from "@/features/account/services/get-billing-overview"
+import { getBillingInvoices } from "@/features/account/services/get-billing-invoices"
 import { getPaymentStatusClassName, getPaymentStatusLabel } from "@/features/payment/utils"
 import { getTransactionHistory } from "@/features/wallet/services/get-transaction-history"
 import { getWalletSummary } from "@/features/wallet/services/get-wallet-summary"
@@ -20,8 +21,9 @@ import { getWalletSummary } from "@/features/wallet/services/get-wallet-summary"
 export default async function DashboardBillingPage() {
   const session = await getAuthSession()
   const userId = session?.user?.id ?? ""
-  const [billingOverview, transactions, walletSummary] = await Promise.all([
+  const [billingOverview, invoices, transactions, walletSummary] = await Promise.all([
     getBillingOverview(userId),
+    getBillingInvoices(userId),
     getTransactionHistory(userId, 8),
     getWalletSummary(userId),
   ])
@@ -123,10 +125,16 @@ export default async function DashboardBillingPage() {
                 Payment methods
               </CardTitle>
               <CardDescription>
-                Foundation cho các provider như Stripe hoặc VNPay đã sẵn sàng, nhưng chưa bật live integration.
+                Stripe Checkout đã được nối vào checkout flow. Ví nội bộ và chuyển khoản thủ công vẫn giữ vai trò phương thức bổ sung.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
+              <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                <p className="font-medium">Stripe Checkout</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Thanh toán thẻ quốc tế được tạo phiên thật qua Stripe. Kết quả webhook sẽ tự đồng bộ lại order, transaction và billing history.
+                </p>
+              </div>
               <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
                 <p className="font-medium">Wallet nội bộ</p>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -149,12 +157,33 @@ export default async function DashboardBillingPage() {
                 Invoice & history
               </CardTitle>
               <CardDescription>
-                Chưa có invoice engine riêng, nhưng billing summary đã đủ để làm nền cho export và đối soát.
+                Mỗi order đã thanh toán sẽ được phản chiếu thành invoice record nền để đối soát và xuất báo cáo sau này.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>- Billing history đang dùng transaction + order summary để hiển thị theo thời gian.</p>
-              <p>- Invoice PDF, mã thuế và corporate billing sẽ được thêm sau khi flow checkout ổn định.</p>
+              {invoices.length > 0 ? (
+                invoices.map((invoice) => (
+                  <div key={invoice.id} className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">{invoice.reference}</p>
+                        <p>
+                          {invoice.paymentMethodLabel} • {invoice.paymentProviderLabel}
+                        </p>
+                        <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                          {formatDateTime(invoice.createdAt)}
+                        </p>
+                      </div>
+                      <p className="font-semibold text-foreground">{invoice.totalAmountLabel}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <p>- Billing history đang dùng transaction + order summary để hiển thị theo thời gian.</p>
+                  <p>- Invoice PDF, mã thuế và corporate billing sẽ được thêm sau khi flow checkout ổn định.</p>
+                </>
+              )}
               <Button asChild className="w-full" variant="outline">
                 <Link href="/dashboard/orders">Mở danh sách đơn hàng</Link>
               </Button>

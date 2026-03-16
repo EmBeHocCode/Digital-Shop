@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import {
   OrderStatus,
+  PaymentIntentStatus,
   Prisma,
   ProductStatus,
   TransactionStatus,
@@ -8,10 +9,16 @@ import {
   WalletStatus,
 } from "@prisma/client"
 import { getPrismaClient } from "@/lib/db/prisma"
+import { isStripeConfigured } from "@/lib/payments/stripe"
 import { resolveProductPurchase } from "@/features/catalog/product-purchase"
 import type { CartItemConfiguration } from "@/features/cart/types"
 import { createOrderSchema, type CreateOrderInput } from "@/features/orders/validations"
 import { getOrderPaymentPlan } from "@/features/payment/services/prepare-payment"
+import { createStripeCheckoutSession } from "@/features/payment/services/stripe-checkout"
+import {
+  markStripeOrderSetupFailed,
+  persistStripeCheckoutSession,
+} from "@/features/payment/services/payment-state-sync"
 import {
   mapPaymentMethodCodeToPrisma,
   mapPaymentProviderCodeToPrisma,
@@ -41,7 +48,7 @@ export interface CreatedOrderSummary {
   status: OrderStatus
   paymentMethod: PaymentMethodCode
   paymentProvider: PaymentProviderCode
-  paymentStatus: "pending" | "succeeded" | "requires_action" | "failed"
+  paymentStatus: "pending" | "succeeded" | "requires_action" | "failed" | "canceled"
   paymentInstructions: {
     title: string
     lines: string[]
@@ -69,11 +76,24 @@ export interface CreatedOrderSummary {
   }>
 }
 
+export interface CreatedOrderResult {
+  order: CreatedOrderSummary
+  payment?: {
+    type: "redirect"
+    provider: PaymentProviderCode
+    redirectUrl: string
+  }
+}
+
 function createOrderReference(prefix: "ORD" | "PAY") {
   return `NC-${prefix}-${randomUUID().slice(0, 8).toUpperCase()}`
 }
 
-export async function createUserOrder(userId: string, rawInput: CreateOrderInput) {
+export async function createUserOrder(
+  userId: string,
+  rawInput: CreateOrderInput,
+  request?: Request | null
+) {
   if (!userId) {
     throw new OrderCreationError("Bạn cần đăng nhập để đặt hàng.", "INVALID_INPUT", 401)
   }
@@ -94,10 +114,18 @@ export async function createUserOrder(userId: string, rawInput: CreateOrderInput
     throw new OrderCreationError("Giỏ hàng đang trống.", "EMPTY_CART", 400)
   }
 
+  if (payload.paymentMethod === "card" && !isStripeConfigured()) {
+    throw new OrderCreationError(
+      "Stripe chưa được cấu hình trên hệ thống này.",
+      "ORDER_CREATION_FAILED",
+      503
+    )
+  }
+
   const prisma = getPrismaClient()
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    const createdOrder = await prisma.$transaction(async (tx) => {
       const uniqueSlugs = [...new Set(payload.items.map((item) => item.slug))]
       const products = await tx.product.findMany({
         where: {
@@ -261,7 +289,9 @@ export async function createUserOrder(userId: string, rawInput: CreateOrderInput
               ? TransactionStatus.COMPLETED
               : paymentPlan.paymentStatus === "failed"
                 ? TransactionStatus.FAILED
-                : TransactionStatus.PENDING,
+                : paymentPlan.paymentStatus === "canceled"
+                  ? TransactionStatus.CANCELLED
+                  : TransactionStatus.PENDING,
           paymentReference,
           note: payload.note || null,
         },
@@ -291,7 +321,7 @@ export async function createUserOrder(userId: string, rawInput: CreateOrderInput
         })),
       })
 
-      await tx.transaction.create({
+      const transaction = await tx.transaction.create({
         data: {
           userId,
           walletId: paymentPlan.requiresWalletBalance ? wallet.id : null,
@@ -304,7 +334,9 @@ export async function createUserOrder(userId: string, rawInput: CreateOrderInput
               ? TransactionStatus.COMPLETED
               : paymentPlan.transactionStatus === TransactionStatus.FAILED
                 ? TransactionStatus.FAILED
-                : TransactionStatus.PENDING,
+                : paymentPlan.transactionStatus === TransactionStatus.CANCELLED
+                  ? TransactionStatus.CANCELLED
+                  : TransactionStatus.PENDING,
           amount: totalAmountDecimal,
           currency,
           description: `Thanh toán đơn hàng ${paymentReference}`,
@@ -322,39 +354,134 @@ export async function createUserOrder(userId: string, rawInput: CreateOrderInput
               })),
           },
         },
+        select: {
+          id: true,
+        },
       })
 
+      const paymentIntent =
+        paymentPlan.provider === "stripe"
+          ? await tx.paymentIntent.create({
+              data: {
+                userId,
+                orderId: order.id,
+                transactionId: transaction.id,
+                provider: mapPaymentProviderCodeToPrisma(paymentPlan.provider),
+                method: mapPaymentMethodCodeToPrisma(payload.paymentMethod),
+                status: PaymentIntentStatus.PENDING,
+                amount: totalAmountDecimal,
+                currency,
+                reference: paymentReference,
+                metadata: {
+                  customerEmail: payload.email,
+                  customerName: payload.name,
+                  note: payload.note || null,
+                },
+              },
+              select: {
+                id: true,
+              },
+            })
+          : null
+
       return {
-        id: order.id,
-        reference: paymentReference,
-        status: order.status,
-        paymentMethod: payload.paymentMethod,
-        paymentProvider: paymentPlan.provider,
-        paymentStatus: paymentPlan.paymentStatus,
-        paymentInstructions: paymentPlan.instructions,
+        order: {
+          id: order.id,
+          reference: paymentReference,
+          status: order.status,
+          paymentMethod: payload.paymentMethod,
+          paymentProvider: paymentPlan.provider,
+          paymentStatus: paymentPlan.paymentStatus,
+          paymentInstructions: paymentPlan.instructions,
+          currency,
+          subtotal: totalAmount,
+          total: totalAmount,
+          createdAt: order.createdAt.toISOString(),
+          customer: {
+            name: payload.name,
+            email: payload.email,
+            phone: payload.phone || undefined,
+            note: payload.note || undefined,
+          },
+          items: normalizedItems.map((item) => ({
+            id: item.lineId,
+            slug: item.slug,
+            name: item.baseName,
+            category: item.category,
+            priceValue: item.unitPrice,
+            priceLabel: item.priceLabel,
+            quantity: item.quantity,
+            tagline: item.tagline,
+            configuration: item.configuration,
+          })),
+        } satisfies CreatedOrderSummary,
+        paymentReference,
+        transactionId: transaction.id,
+        paymentIntentId: paymentIntent?.id ?? null,
+        items: normalizedItems,
         currency,
-        subtotal: totalAmount,
-        total: totalAmount,
-        createdAt: order.createdAt.toISOString(),
-        customer: {
-          name: payload.name,
-          email: payload.email,
-          phone: payload.phone || undefined,
-          note: payload.note || undefined,
-        },
-        items: normalizedItems.map((item) => ({
-          id: item.lineId,
-          slug: item.slug,
-          name: item.baseName,
-          category: item.category,
-          priceValue: item.unitPrice,
-          priceLabel: item.priceLabel,
-          quantity: item.quantity,
-          tagline: item.tagline,
-          configuration: item.configuration,
-        })),
-      } satisfies CreatedOrderSummary
+      }
     })
+
+    if (createdOrder.order.paymentProvider === "stripe" && createdOrder.paymentIntentId) {
+      try {
+        const stripeSession = await createStripeCheckoutSession({
+          orderId: createdOrder.order.id,
+          paymentIntentId: createdOrder.paymentIntentId,
+          transactionId: createdOrder.transactionId,
+          paymentReference: createdOrder.paymentReference,
+          customerEmail: createdOrder.order.customer.email,
+          customerName: createdOrder.order.customer.name,
+          note: createdOrder.order.customer.note,
+          currency: createdOrder.currency,
+          items: createdOrder.items.map((item) => ({
+            name: item.baseName,
+            tagline: item.tagline,
+            quantity: item.quantity,
+            unitPrice: item.unitPrice,
+            currency: createdOrder.currency,
+            slug: item.slug,
+            configuration: item.configuration,
+          })),
+          request,
+        })
+
+        await persistStripeCheckoutSession({
+          paymentIntentId: createdOrder.paymentIntentId,
+          checkoutSessionId: stripeSession.id,
+          checkoutUrl: stripeSession.url ?? null,
+        })
+
+        return {
+          order: createdOrder.order,
+          payment: stripeSession.url
+            ? {
+                type: "redirect",
+                provider: "stripe",
+                redirectUrl: stripeSession.url,
+              }
+            : undefined,
+        } satisfies CreatedOrderResult
+      } catch (error) {
+        await markStripeOrderSetupFailed({
+          orderId: createdOrder.order.id,
+          paymentIntentId: createdOrder.paymentIntentId,
+          transactionId: createdOrder.transactionId,
+          paymentReference: createdOrder.paymentReference,
+          reason: error instanceof Error ? error.message : "Không thể tạo phiên thanh toán Stripe.",
+        }).catch(() => undefined)
+
+        throw new OrderCreationError(
+          "Không thể khởi tạo phiên thanh toán Stripe lúc này.",
+          "ORDER_CREATION_FAILED",
+          502
+        )
+      }
+    }
+
+    return {
+      order: createdOrder.order,
+    } satisfies CreatedOrderResult
   } catch (error) {
     if (error instanceof OrderCreationError) {
       throw error

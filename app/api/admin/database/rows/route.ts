@@ -1,163 +1,238 @@
+import { NextRequest, NextResponse } from "next/server"
 import { getAuthSession } from "@/lib/auth"
 import { getPrismaClient } from "@/lib/db/prisma"
-import { NextRequest, NextResponse } from "next/server"
+import {
+  buildPrimaryKeyWhereClause,
+  ensureSqlManagerAccess,
+  getTableColumns,
+  normalizeEditablePayload,
+  normalizeLimit,
+  normalizeOffset,
+  normalizeSortDirection,
+  quoteIdentifier,
+  serializeRow,
+  SqlManagerError,
+} from "@/features/admin/sql-manager/server-utils"
+import type { SqlRowsResponse } from "@/features/admin/sql-manager/types"
 
-interface RowQueryParams {
-  table?: string
-  limit?: string
-  offset?: string
+function handleError(error: unknown, context: string) {
+  console.error(context, error)
+
+  if (error instanceof SqlManagerError) {
+    return NextResponse.json({ error: error.message }, { status: error.status })
+  }
+
+  return NextResponse.json({ error: "Database manager action failed" }, { status: 500 })
+}
+
+function createSearchClause(columns: string[], search: string) {
+  if (!search.trim()) {
+    return { clause: "", values: [] as unknown[] }
+  }
+
+  const searchValue = `%${search.trim()}%`
+  const searchParts = columns.map(
+    (column, index) => `CAST(${quoteIdentifier(column)} AS TEXT) ILIKE $${index + 1}`
+  )
+
+  return {
+    clause: `WHERE (${searchParts.join(" OR ")})`,
+    values: columns.map(() => searchValue),
+  }
 }
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getAuthSession()
+    ensureSqlManagerAccess(session)
 
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const tableName = req.nextUrl.searchParams.get("table")
+    if (!tableName) {
+      throw new SqlManagerError("Table name required")
     }
+
+    const limit = normalizeLimit(req.nextUrl.searchParams.get("limit"))
+    const offset = normalizeOffset(req.nextUrl.searchParams.get("offset"))
+    const search = req.nextUrl.searchParams.get("search") ?? ""
+    const sortBy = req.nextUrl.searchParams.get("sortBy")
+    const sortDirection = normalizeSortDirection(req.nextUrl.searchParams.get("sortDirection"))
 
     const prisma = getPrismaClient()
-    const params = Object.fromEntries(req.nextUrl.searchParams) as RowQueryParams
-    const tableName = params.table
-    const limit = Math.min(parseInt(params.limit || "100"), 1000)
-    const offset = parseInt(params.offset || "0")
+    const columns = await getTableColumns(prisma, tableName)
+    const columnNames = columns.map((column) => column.columnName)
+    const primaryKeys = columns.filter((column) => column.isPrimaryKey).map((column) => column.columnName)
 
-    if (!tableName) {
-      return NextResponse.json({ error: "Table name required" }, { status: 400 })
+    if (sortBy && !columnNames.includes(sortBy)) {
+      throw new SqlManagerError(`Unknown sort column "${sortBy}"`)
     }
 
-    // Get rows with pagination
-    const rows = await prisma.$queryRawUnsafe(
-      `SELECT * FROM "${tableName}" LIMIT ${limit} OFFSET ${offset}`
+    const searchState = createSearchClause(columnNames, search)
+    const orderColumn =
+      sortBy ?? primaryKeys[0] ?? columns.find((column) => column.isEditable)?.columnName ?? columns[0]?.columnName
+    const orderClause = orderColumn
+      ? `ORDER BY ${quoteIdentifier(orderColumn)} ${sortDirection.toUpperCase()}`
+      : ""
+
+    const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
+      [
+        `SELECT * FROM ${quoteIdentifier(tableName)}`,
+        searchState.clause,
+        orderClause,
+        `LIMIT ${limit}`,
+        `OFFSET ${offset}`,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      ...searchState.values
     )
 
-    // Get total count
     const countResult = await prisma.$queryRawUnsafe<Array<{ count: string }>>(
-      `SELECT COUNT(*) as count FROM "${tableName}"`
+      [
+        `SELECT COUNT(*)::text AS count FROM ${quoteIdentifier(tableName)}`,
+        searchState.clause,
+      ]
+        .filter(Boolean)
+        .join(" "),
+      ...searchState.values
     )
-    const total = parseInt((countResult[0]?.count as string) || "0")
 
-    return NextResponse.json({
-      rows,
+    const total = Number.parseInt(countResult[0]?.count ?? "0", 10)
+
+    const payload: SqlRowsResponse = {
+      rows: rows.map(serializeRow),
+      columns,
+      primaryKeys,
       total,
       limit,
       offset,
       hasMore: offset + limit < total,
-    })
+      sortBy: orderColumn ?? null,
+      sortDirection,
+      search,
+    }
+
+    return NextResponse.json(payload)
   } catch (error) {
-    console.error("[GET /api/admin/database/rows]", error)
-    return NextResponse.json({ error: "Failed to fetch rows" }, { status: 500 })
+    return handleError(error, "[GET /api/admin/database/rows]")
   }
 }
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getAuthSession()
+    ensureSqlManagerAccess(session)
 
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const { table, data } = (await req.json()) as {
+      table?: string
+      data?: Record<string, unknown>
     }
 
-    const { table, data } = await req.json()
-
-    if (!table) {
-      return NextResponse.json({ error: "Table name required" }, { status: 400 })
+    if (!table || !data) {
+      throw new SqlManagerError("Table and row data are required")
     }
 
     const prisma = getPrismaClient()
+    const columns = await getTableColumns(prisma, table)
+    const payload = normalizeEditablePayload(data, columns, "insert")
 
-    // Build INSERT statement
-    const columns = Object.keys(data)
-    const values = Object.values(data)
-    const placeholders = columns.map((_, i) => `$${i + 1}`).join(", ")
+    const entries = Object.entries(payload)
+    if (entries.length === 0) {
+      throw new SqlManagerError("No writable column values provided")
+    }
 
-    const query = `
-      INSERT INTO "${table}" (${columns.map((c) => `"${c}"`).join(", ")})
-      VALUES (${placeholders})
-      RETURNING *
-    `
+    const columnSql = entries.map(([key]) => quoteIdentifier(key)).join(", ")
+    const valueSql = entries.map((_, index) => `$${index + 1}`).join(", ")
+    const values = entries.map(([, value]) => value)
 
-    const result = await prisma.$queryRawUnsafe(query, ...values)
+    const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
+      `INSERT INTO ${quoteIdentifier(table)} (${columnSql}) VALUES (${valueSql}) RETURNING *`,
+      ...values
+    )
 
-    return NextResponse.json({ success: true, data: result })
+    return NextResponse.json({
+      success: true,
+      data: rows.map(serializeRow),
+    })
   } catch (error) {
-    console.error("[POST /api/admin/database/rows]", error)
-    return NextResponse.json({ error: "Failed to insert row" }, { status: 500 })
+    return handleError(error, "[POST /api/admin/database/rows]")
   }
 }
 
 export async function PUT(req: NextRequest) {
   try {
     const session = await getAuthSession()
+    ensureSqlManagerAccess(session)
 
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const { table, data, where } = (await req.json()) as {
+      table?: string
+      data?: Record<string, unknown>
+      where?: Record<string, unknown>
     }
 
-    const { table, data, where } = await req.json()
-
-    if (!table) {
-      return NextResponse.json({ error: "Table name required" }, { status: 400 })
+    if (!table || !data || !where) {
+      throw new SqlManagerError("Table, row data, and row identity are required")
     }
 
     const prisma = getPrismaClient()
+    const columns = await getTableColumns(prisma, table)
+    const primaryKeys = columns.filter((column) => column.isPrimaryKey).map((column) => column.columnName)
+    const payload = normalizeEditablePayload(data, columns, "update")
+    const entries = Object.entries(payload)
 
-    // Build UPDATE statement
-    const setClause = Object.keys(data)
-      .map((key, i) => `"${key}" = $${i + 1}`)
+    if (entries.length === 0) {
+      throw new SqlManagerError("No editable values provided")
+    }
+
+    const setClause = entries
+      .map(([key], index) => `${quoteIdentifier(key)} = $${index + 1}`)
       .join(", ")
+    const setValues = entries.map(([, value]) => value)
+    const whereState = buildPrimaryKeyWhereClause(primaryKeys, where)
 
-    const whereValues = Object.values(where)
-    const whereClause = Object.keys(where)
-      .map((key, i) => `"${key}" = $${Object.keys(data).length + i + 1}`)
-      .join(" AND ")
+    const rows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
+      `UPDATE ${quoteIdentifier(table)} SET ${setClause} WHERE ${whereState.clause} RETURNING *`,
+      ...setValues,
+      ...whereState.values
+    )
 
-    const query = `
-      UPDATE "${table}"
-      SET ${setClause}
-      WHERE ${whereClause}
-      RETURNING *
-    `
-
-    const allValues = [...Object.values(data), ...whereValues]
-    const result = await prisma.$queryRawUnsafe(query, ...allValues)
-
-    return NextResponse.json({ success: true, data: result })
+    return NextResponse.json({
+      success: true,
+      data: rows.map(serializeRow),
+    })
   } catch (error) {
-    console.error("[PUT /api/admin/database/rows]", error)
-    return NextResponse.json({ error: "Failed to update row" }, { status: 500 })
+    return handleError(error, "[PUT /api/admin/database/rows]")
   }
 }
 
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getAuthSession()
+    ensureSqlManagerAccess(session)
 
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const { table, where } = (await req.json()) as {
+      table?: string
+      where?: Record<string, unknown>
     }
 
-    const { table, where } = await req.json()
-
-    if (!table) {
-      return NextResponse.json({ error: "Table name required" }, { status: 400 })
+    if (!table || !where) {
+      throw new SqlManagerError("Table and row identity are required")
     }
 
     const prisma = getPrismaClient()
+    const columns = await getTableColumns(prisma, table)
+    const primaryKeys = columns.filter((column) => column.isPrimaryKey).map((column) => column.columnName)
+    const whereState = buildPrimaryKeyWhereClause(primaryKeys, where)
 
-    // Build DELETE statement
-    const whereValues = Object.values(where)
-    const whereClause = Object.keys(where)
-      .map((key, i) => `"${key}" = $${i + 1}`)
-      .join(" AND ")
+    const deletedRows = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(
+      `DELETE FROM ${quoteIdentifier(table)} WHERE ${whereState.clause} RETURNING *`,
+      ...whereState.values
+    )
 
-    const query = `DELETE FROM "${table}" WHERE ${whereClause}`
-
-    await prisma.$queryRawUnsafe(query, ...whereValues)
-
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      data: deletedRows.map(serializeRow),
+    })
   } catch (error) {
-    console.error("[DELETE /api/admin/database/rows]", error)
-    return NextResponse.json({ error: "Failed to delete row" }, { status: 500 })
+    return handleError(error, "[DELETE /api/admin/database/rows]")
   }
 }

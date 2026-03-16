@@ -1,48 +1,69 @@
+import { NextRequest, NextResponse } from "next/server"
 import { getAuthSession } from "@/lib/auth"
 import { getPrismaClient } from "@/lib/db/prisma"
-import { NextRequest, NextResponse } from "next/server"
+import { ensureSqlManagerAccess, SqlManagerError } from "@/features/admin/sql-manager/server-utils"
+import type { SqlQueryResult } from "@/features/admin/sql-manager/types"
 
 function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : "Query execution failed"
+  if (error instanceof SqlManagerError) {
+    return {
+      message: error.message,
+      status: error.status,
+    }
+  }
+
+  return {
+    message: error instanceof Error ? error.message : "Query execution failed",
+    status: 500,
+  }
+}
+
+function inferQueryMode(query: string): "read" | "write" {
+  return /^\s*select\b/i.test(query) ? "read" : "write"
 }
 
 export async function POST(req: NextRequest) {
   try {
     const session = await getAuthSession()
+    ensureSqlManagerAccess(session)
 
-    if (!session?.user?.id || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    const { query } = (await req.json()) as { query?: string }
+    if (!query?.trim()) {
+      throw new SqlManagerError("Query required")
     }
 
-    const { query } = await req.json()
-
-    if (!query) {
-      return NextResponse.json({ error: "Query required" }, { status: 400 })
-    }
-
-    // Sanitize query - prevent dangerous operations
     const upperQuery = query.toUpperCase().trim()
-    if (
-      upperQuery.startsWith("DROP") ||
-      upperQuery.startsWith("TRUNCATE") ||
-      upperQuery.startsWith("ALTER") ||
-      upperQuery.startsWith("CREATE")
-    ) {
-      return NextResponse.json(
-        { error: "DDL operations not allowed via query endpoint" },
-        { status: 403 }
-      )
+    if (upperQuery.startsWith("TRUNCATE")) {
+      throw new SqlManagerError("TRUNCATE is blocked in SQL Manager", 403)
     }
 
     const prisma = getPrismaClient()
-    const result = await prisma.$queryRawUnsafe(query)
+    const executionMode = inferQueryMode(query)
 
-    return NextResponse.json({ success: true, data: result })
+    if (executionMode === "read") {
+      const result = await prisma.$queryRawUnsafe<Record<string, unknown>[]>(query)
+      const payload: SqlQueryResult = {
+        rows: result,
+        columns: result[0] ? Object.keys(result[0]) : [],
+        executionMode,
+        affectedRows: result.length,
+      }
+
+      return NextResponse.json({ success: true, data: payload })
+    }
+
+    const affectedRows = await prisma.$executeRawUnsafe(query)
+    const payload: SqlQueryResult = {
+      rows: [],
+      columns: [],
+      executionMode,
+      affectedRows,
+    }
+
+    return NextResponse.json({ success: true, data: payload })
   } catch (error) {
     console.error("[POST /api/admin/database/query]", error)
-    return NextResponse.json(
-      { error: getErrorMessage(error) },
-      { status: 500 }
-    )
+    const detail = getErrorMessage(error)
+    return NextResponse.json({ error: detail.message }, { status: detail.status })
   }
 }

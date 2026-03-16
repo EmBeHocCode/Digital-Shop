@@ -10,6 +10,8 @@ export const ROLE_HIERARCHY = {
 
 export const MANAGEMENT_ROLES: UserRole[] = ["STAFF", "MANAGER", "ADMIN", "SUPERADMIN"];
 export const CUSTOMER_ROLES: UserRole[] = ["CUSTOMER"];
+export const ADMIN_ROUTE_ROLES: UserRole[] = ["STAFF", "MANAGER", "ADMIN", "SUPERADMIN"];
+export const DEFAULT_ACCOUNT_PATH = "/dashboard/profile";
 
 /**
  * Check if a role has management dashboard access
@@ -19,8 +21,13 @@ export function canAccessManagementDashboard(role?: UserRole | null): boolean {
   return MANAGEMENT_ROLES.includes(role);
 }
 
+export function canAccessAdmin(role?: UserRole | null): boolean {
+  if (!role) return false;
+  return ADMIN_ROUTE_ROLES.includes(role);
+}
+
 export function getDefaultSignedInPath(role?: UserRole | null): string {
-  return canAccessManagementDashboard(role) ? "/dashboard" : "/";
+  return role ? DEFAULT_ACCOUNT_PATH : "/";
 }
 
 export function normalizeRedirectPath(input?: string | null): string {
@@ -43,12 +50,20 @@ export function resolvePostAuthPath(
   const normalizedPath = normalizeRedirectPath(requestedPath);
   const defaultPath = getDefaultSignedInPath(role);
 
-  if (normalizedPath === "/login" || normalizedPath === "/register") {
+  if (
+    normalizedPath === "/" ||
+    normalizedPath === "/login" ||
+    normalizedPath === "/register"
+  ) {
     return defaultPath;
   }
 
-  if (normalizedPath.startsWith("/dashboard") && !canAccessManagementDashboard(role)) {
+  if (normalizedPath.startsWith("/dashboard") && !canAccessCustomerAccount(role)) {
     return "/";
+  }
+
+  if (normalizedPath.startsWith("/dashboard/admin") && !canAccessAdmin(role)) {
+    return DEFAULT_ACCOUNT_PATH;
   }
 
   return normalizedPath || defaultPath;
@@ -68,6 +83,11 @@ export function canAccessCustomerAccount(role?: UserRole | null): boolean {
 export function canManageOrders(role?: UserRole | null): boolean {
   if (!role) return false;
   return ["STAFF", "MANAGER", "ADMIN", "SUPERADMIN"].includes(role);
+}
+
+export function canManageWallet(role?: UserRole | null): boolean {
+  if (!role) return false;
+  return ["MANAGER", "ADMIN", "SUPERADMIN"].includes(role);
 }
 
 /**
@@ -102,6 +122,56 @@ export function canManageSystemSettings(role?: UserRole | null): boolean {
   return ["ADMIN", "SUPERADMIN"].includes(role);
 }
 
+export type AdminSection =
+  | "overview"
+  | "orders"
+  | "users"
+  | "wallet"
+  | "products"
+  | "billing"
+  | "sql-manager";
+
+export function getAllowedAdminSections(role?: UserRole | null): AdminSection[] {
+  if (!role || !canAccessAdmin(role)) {
+    return [];
+  }
+
+  const sections: AdminSection[] = ["overview"];
+
+  if (canManageOrders(role)) {
+    sections.push("orders");
+  }
+
+  if (canManageWallet(role)) {
+    sections.push("wallet");
+  }
+
+  if (canManageProducts(role)) {
+    sections.push("products");
+  }
+
+  if (canManageBilling(role)) {
+    sections.push("billing");
+  }
+
+  if (canManageUsers(role)) {
+    sections.push("users");
+  }
+
+  if (canManageSystemSettings(role)) {
+    sections.push("sql-manager");
+  }
+
+  return sections;
+}
+
+export function canAccessAdminSection(
+  role: UserRole | undefined,
+  section: AdminSection
+): boolean {
+  return getAllowedAdminSections(role).includes(section);
+}
+
 /**
  * Check if one role has higher or equal privilege than another
  */
@@ -121,8 +191,10 @@ export function getAllowedDashboardSections(role?: UserRole | null): string[] {
 
   const sections: string[] = [];
 
+  sections.push("profile");
+
   if (role === "CUSTOMER") {
-    sections.push("profile", "orders", "wallet", "purchased-products", "billing", "settings");
+    sections.push("orders", "wallet", "purchased-products", "billing", "settings");
   } else if (role === "STAFF") {
     sections.push("orders");
   } else if (role === "MANAGER") {

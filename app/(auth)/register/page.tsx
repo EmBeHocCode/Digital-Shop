@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { AuthShell } from "@/features/auth/components/auth-shell"
 import { RegisterForm } from "@/features/auth/components/register-form"
+import { DEFAULT_ACCOUNT_PATH } from "@/lib/auth/role-helpers"
 
 interface RegisterPageProps {
   searchParams: Promise<{
@@ -15,14 +16,14 @@ export const metadata: Metadata = {
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
   const resolvedSearchParams = await searchParams
-  const callbackUrl = resolvedSearchParams.callbackUrl || "/"
+  const callbackUrl = resolvedSearchParams.callbackUrl || DEFAULT_ACCOUNT_PATH
 
   return (
     <AuthShell
       alternateHref={`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`}
       alternateLabel="Đăng nhập"
       alternateText="Đã có tài khoản?"
-      description="Đăng ký tài khoản mới để nhận ví mặc định và quay về trang chủ sau khi đăng nhập. Dashboard chỉ hiển thị cho tài khoản có quyền quản lý."
+      description="Đăng ký tài khoản mới để nhận ví mặc định, sau đó xác minh email trước khi đăng nhập và tiếp tục mua hàng an toàn."
       title="Tạo tài khoản để tiếp tục mua hàng"
     >
       <RegisterForm callbackUrl={callbackUrl} />

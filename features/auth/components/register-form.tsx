@@ -4,7 +4,6 @@ import { useState, useTransition } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { getSession, signIn } from "next-auth/react"
 import { useForm } from "react-hook-form"
 import { AlertCircle, Loader2 } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
@@ -20,8 +19,6 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { registerSchema, type RegisterInput } from "@/features/auth/validations"
-import { resolvePostAuthPath } from "@/lib/auth/role-helpers"
-
 interface RegisterFormProps {
   callbackUrl: string
 }
@@ -54,7 +51,13 @@ export function RegisterForm({ callbackUrl }: RegisterFormProps) {
       })
 
       const payload = (await response.json().catch(() => null)) as
-        | { success: boolean; message?: string; field?: "email" | "form" }
+        | {
+            success: boolean
+            message?: string
+            field?: "email" | "form"
+            email?: string
+            verificationEmailSent?: boolean
+          }
         | null
 
       if (!response.ok || !payload?.success) {
@@ -70,26 +73,13 @@ export function RegisterForm({ callbackUrl }: RegisterFormProps) {
         return
       }
 
-      const signInResult = await signIn("credentials", {
-        email: values.email,
-        password: values.password,
-        redirect: false,
-        callbackUrl,
-      })
+      const nextEmail = payload?.email ?? values.email
 
-      if (!signInResult || signInResult.error) {
-        router.push(`/login?callbackUrl=${encodeURIComponent(callbackUrl)}`)
-        router.refresh()
-        return
-      }
-
-      const session = await getSession()
-      const redirectPath = resolvePostAuthPath(
-        session?.user?.role,
-        signInResult.url ?? callbackUrl
+      router.push(
+        `/verify-email/pending?email=${encodeURIComponent(nextEmail)}&sent=${
+          payload?.verificationEmailSent ? "1" : "0"
+        }&callbackUrl=${encodeURIComponent(callbackUrl)}`
       )
-
-      router.push(redirectPath)
       router.refresh()
     })
   }
@@ -222,7 +212,7 @@ export function RegisterForm({ callbackUrl }: RegisterFormProps) {
                   Đang tạo tài khoản
                 </>
               ) : (
-                "Tạo tài khoản và tiếp tục"
+                "Tạo tài khoản"
               )}
             </Button>
           </form>

@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import Link from "next/link"
 import { CheckCircle2, CreditCard, LayoutDashboard, ShoppingCart } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
@@ -22,7 +23,14 @@ interface OrderSuccessPageContentProps {
 export function OrderSuccessPageContent({ order }: OrderSuccessPageContentProps) {
   const lastOrder = useCartStore((state) => state.lastOrder)
   const isHydrated = useCartStore((state) => state.isHydrated)
+  const clearCart = useCartStore((state) => state.clearCart)
   const currentOrder = order ?? lastOrder
+
+  useEffect(() => {
+    if (order) {
+      clearCart()
+    }
+  }, [clearCart, order])
 
   if (!order && !isHydrated) {
     return (
@@ -115,7 +123,7 @@ export function OrderSuccessPageContent({ order }: OrderSuccessPageContentProps)
                   <p className="max-w-3xl text-base leading-relaxed text-muted-foreground">
                     {"paymentInstructions" in currentOrder
                       ? currentOrder.paymentInstructions.lines[0]
-                      : "Đơn hàng đã được lưu vào hệ thống và sẵn sàng cho bước thanh toán tiếp theo."}
+                      : "Đơn hàng đã được lưu vào hệ thống và trạng thái thanh toán sẽ tiếp tục đồng bộ từ backend."}
                   </p>
                 </div>
               </div>

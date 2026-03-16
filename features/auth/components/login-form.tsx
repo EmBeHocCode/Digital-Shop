@@ -33,6 +33,7 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [formError, setFormError] = useState<string | null>(null)
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
@@ -47,6 +48,7 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
 
   const handleSubmit = (values: SignInInput) => {
     setFormError(null)
+    setVerificationEmail(null)
 
     const expectedAnswer = String(challenge.firstOperand + challenge.secondOperand)
 
@@ -70,6 +72,17 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
       })
 
       if (!result || result.error) {
+        if (result?.error?.includes("EMAIL_NOT_VERIFIED")) {
+          setVerificationEmail(values.email)
+          setFormError("Email của bạn chưa được xác minh. Hãy kiểm tra hộp thư hoặc gửi lại liên kết xác minh.")
+          return
+        }
+
+        if (result?.error?.includes("ACCOUNT_INACTIVE")) {
+          setFormError("Tài khoản của bạn hiện đang bị khóa. Vui lòng liên hệ hỗ trợ.")
+          return
+        }
+
         setFormError("Thông tin đăng nhập hoặc xác thực người dùng chưa đúng.")
         return
       }
@@ -95,7 +108,16 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
           <Alert variant="destructive">
             <AlertCircle className="size-4" />
             <AlertTitle>Không thể đăng nhập</AlertTitle>
-            <AlertDescription>{formError}</AlertDescription>
+            <AlertDescription className="space-y-3">
+              <p>{formError}</p>
+              {verificationEmail ? (
+                <Button asChild size="sm" variant="outline">
+                  <Link href={`/verify-email/pending?email=${encodeURIComponent(verificationEmail)}`}>
+                    Gửi lại email xác minh
+                  </Link>
+                </Button>
+              ) : null}
+            </AlertDescription>
           </Alert>
         ) : null}
 
@@ -139,12 +161,20 @@ export function LoginForm({ callbackUrl, challenge }: LoginFormProps) {
                 <FormItem>
                   <div className="flex items-center justify-between gap-3">
                     <FormLabel>Mật khẩu</FormLabel>
-                    <Link
-                      href="/register"
-                      className="text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      Chưa có tài khoản?
-                    </Link>
+                    <div className="flex items-center gap-3 text-xs font-medium">
+                      <Link
+                        href="/forgot-password"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        Quên mật khẩu?
+                      </Link>
+                      <Link
+                        href="/register"
+                        className="text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        Chưa có tài khoản?
+                      </Link>
+                    </div>
                   </div>
                   <FormControl>
                     <Input

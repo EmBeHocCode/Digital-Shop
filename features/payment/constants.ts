@@ -17,6 +17,16 @@ export const checkoutPaymentOptions: Array<
     description: "Thanh toán ngay bằng số dư ví nếu tài khoản của bạn đã có tiền.",
     icon: Wallet,
   },
+  ...(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+    ? [
+        {
+          value: "card",
+          title: "Thẻ quốc tế",
+          description: "Thanh toán trực tiếp qua Stripe Checkout và đối soát kết quả qua webhook.",
+          icon: CreditCard,
+        } satisfies CheckoutPaymentOption & { icon: LucideIcon },
+      ]
+    : []),
   {
     value: "bank_transfer",
     title: "Chuyển khoản",
@@ -34,7 +44,8 @@ export const checkoutPaymentOptions: Array<
 export const topupPaymentOptions: Array<
   TopupPaymentOption & { icon: LucideIcon }
 > = checkoutPaymentOptions.filter(
-  (option): option is TopupPaymentOption & { icon: LucideIcon } => option.value !== "wallet"
+  (option): option is TopupPaymentOption & { icon: LucideIcon } =>
+    option.value !== "wallet" && option.value !== "card"
 )
 
 export const paymentProviderLabels: Record<PaymentProviderCode, string> = {
@@ -50,10 +61,12 @@ export const paymentStatusLabels: Record<PaymentIntentStatus, string> = {
   succeeded: "Đã thanh toán",
   requires_action: "Cần thao tác thêm",
   failed: "Thanh toán lỗi",
+  canceled: "Đã huỷ thanh toán",
 }
 
 export const paymentMethodLabels: Record<PaymentMethodCode, string> = {
   wallet: "Ví NexCloud",
+  card: "Thẻ quốc tế",
   bank_transfer: "Chuyển khoản",
   manual_confirmation: "Xác nhận thủ công",
 }

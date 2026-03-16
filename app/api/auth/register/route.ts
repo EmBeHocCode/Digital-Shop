@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     )
   }
 
-  const result = await registerUser(payload)
+  const result = await registerUser(payload, request)
 
   if (!result.success) {
     return NextResponse.json(result, { status: result.status })
@@ -28,6 +28,8 @@ export async function POST(request: Request) {
     {
       success: true,
       userId: result.userId,
+      email: result.email,
+      verificationEmailSent: result.verificationEmailSent,
     },
     { status: 201 }
   )

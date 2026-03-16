@@ -63,7 +63,7 @@ export default async function DashboardOrdersPage() {
             <CardTitle className="text-2xl">{pendingOrders}</CardTitle>
           </CardHeader>
           <CardContent className="text-sm text-muted-foreground">
-            Các đơn đang chờ xác minh bank transfer hoặc manual confirmation.
+            Bao gồm đơn đang chờ webhook Stripe, chuyển khoản thủ công hoặc xác nhận thủ công.
           </CardContent>
         </Card>
         <Card className="border-border/80 bg-card/95">

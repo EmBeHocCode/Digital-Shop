@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { redirect } from "next/navigation"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -15,6 +16,11 @@ import { getPaymentMethodLabel, getPaymentStatusClassName, getPaymentStatusLabel
 
 export default async function DashboardPage() {
   const session = await getAuthSession()
+
+  if (session?.user?.role === "CUSTOMER") {
+    redirect("/dashboard/profile")
+  }
+
   const userId = session?.user?.id ?? ""
 
   const [walletSummary, billingOverview, recentOrders, purchasedProducts, transactions] =

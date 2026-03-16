@@ -17,7 +17,7 @@ export interface DashboardPageContent {
   description: string
   href: string
   icon: LucideIcon
-  group: "Workspace" | "Commerce"
+  group: "Workspace" | "Commerce" | "Admin"
   requiredRoles?: UserRole[]
 }
 
@@ -29,7 +29,7 @@ export const dashboardPages = {
     href: "/dashboard",
     icon: BarChart3,
     group: "Workspace",
-    requiredRoles: ["CUSTOMER"],
+    requiredRoles: ["STAFF", "MANAGER", "ADMIN", "SUPERADMIN"],
   },
   profile: {
     title: "Profile",
@@ -38,7 +38,7 @@ export const dashboardPages = {
     href: "/dashboard/profile",
     icon: UserRound,
     group: "Workspace",
-    requiredRoles: ["CUSTOMER"],
+    requiredRoles: ["CUSTOMER", "STAFF", "MANAGER", "ADMIN", "SUPERADMIN"],
   },
   orders: {
     title: "Orders",
@@ -47,7 +47,7 @@ export const dashboardPages = {
     href: "/dashboard/orders",
     icon: ReceiptText,
     group: "Commerce",
-    requiredRoles: ["CUSTOMER"],
+    requiredRoles: ["CUSTOMER", "STAFF", "MANAGER", "ADMIN", "SUPERADMIN"],
   },
   wallet: {
     title: "Wallet",
@@ -74,7 +74,7 @@ export const dashboardPages = {
     href: "/dashboard/billing",
     icon: BadgeDollarSign,
     group: "Commerce",
-    requiredRoles: ["CUSTOMER"],
+    requiredRoles: ["CUSTOMER", "MANAGER", "ADMIN", "SUPERADMIN"],
   },
   settings: {
     title: "Settings",
@@ -91,12 +91,73 @@ export const dashboardPages = {
     description: "Browse and manage database tables, view data, and execute queries.",
     href: "/dashboard/admin/sql-manager",
     icon: Database,
-    group: "Workspace",
-    requiredRoles: ["ADMIN"],
+    group: "Admin",
+    requiredRoles: ["ADMIN", "SUPERADMIN"],
+  },
+  adminHome: {
+    title: "Admin Hub",
+    heading: "Admin Operations",
+    description: "Trung tâm vận hành nội bộ cho đơn hàng, khách hàng, ví, sản phẩm và các tác vụ backoffice.",
+    href: "/dashboard/admin",
+    icon: BarChart3,
+    group: "Admin",
+    requiredRoles: ["STAFF", "MANAGER", "ADMIN", "SUPERADMIN"],
+  },
+  adminOrders: {
+    title: "Admin Orders",
+    heading: "Quản lý đơn hàng",
+    description: "Danh sách và thao tác vận hành đơn hàng toàn hệ thống.",
+    href: "/dashboard/admin/orders",
+    icon: ReceiptText,
+    group: "Admin",
+    requiredRoles: ["STAFF", "MANAGER", "ADMIN", "SUPERADMIN"],
+  },
+  adminUsers: {
+    title: "Admin Users",
+    heading: "Khách hàng & người dùng",
+    description: "Quản lý vai trò, trạng thái hoạt động và hồ sơ tài khoản của người dùng hệ thống.",
+    href: "/dashboard/admin/users",
+    icon: UserRound,
+    group: "Admin",
+    requiredRoles: ["ADMIN", "SUPERADMIN"],
+  },
+  adminWallet: {
+    title: "Admin Wallet",
+    heading: "Ví & giao dịch hệ thống",
+    description: "Theo dõi số dư ví, lịch sử giao dịch và các điều chỉnh vận hành.",
+    href: "/dashboard/admin/wallet",
+    icon: Wallet,
+    group: "Admin",
+    requiredRoles: ["MANAGER", "ADMIN", "SUPERADMIN"],
+  },
+  adminProducts: {
+    title: "Admin Products",
+    heading: "Quản lý sản phẩm",
+    description: "Quản lý danh mục dịch vụ, trạng thái publish và pricing foundation của storefront.",
+    href: "/dashboard/admin/products",
+    icon: Boxes,
+    group: "Admin",
+    requiredRoles: ["MANAGER", "ADMIN", "SUPERADMIN"],
   },
 } satisfies Record<string, DashboardPageContent>
 
 export const dashboardNavigation = Object.values(dashboardPages)
+
+const dashboardNavigationOrder = [
+  "/dashboard",
+  "/dashboard/profile",
+  "/dashboard/orders",
+  "/dashboard/wallet",
+  "/dashboard/purchased-products",
+  "/dashboard/billing",
+  "/dashboard/settings",
+  "/dashboard/admin",
+  "/dashboard/admin/orders",
+  "/dashboard/admin/users",
+  "/dashboard/admin/wallet",
+  "/dashboard/admin/products",
+  "/dashboard/admin/sql-manager",
+]
 
 /**
  * Get allowed navigation items for a specific role
@@ -104,11 +165,16 @@ export const dashboardNavigation = Object.values(dashboardPages)
 export function getNavigationForRole(role?: string): DashboardPageContent[] {
   if (!role) return []
 
-  return dashboardNavigation.filter((item) => {
+  return dashboardNavigation
+    .filter((item) => {
     if (!item.requiredRoles || item.requiredRoles.length === 0) return true
     const itemRequiredRoles: string[] = item.requiredRoles
     return itemRequiredRoles.includes(role)
-  })
+    })
+    .sort(
+      (left, right) =>
+        dashboardNavigationOrder.indexOf(left.href) - dashboardNavigationOrder.indexOf(right.href)
+    )
 }
 
 export function getDashboardPageMeta(pathname: string) {
@@ -116,9 +182,10 @@ export function getDashboardPageMeta(pathname: string) {
     return dashboardPages.overview
   }
 
-  const page = dashboardNavigation.find(
-    (item) => item.href !== dashboardPages.overview.href && pathname.startsWith(item.href)
-  )
+  const page = [...dashboardNavigation]
+    .filter((item) => item.href !== dashboardPages.overview.href)
+    .sort((left, right) => right.href.length - left.href.length)
+    .find((item) => pathname.startsWith(item.href))
 
   if (page) {
     return page

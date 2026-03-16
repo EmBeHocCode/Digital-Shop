@@ -5,26 +5,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { TablesView } from "./components/tables-view"
 import { QueryEditor } from "./components/query-editor"
 import { Database } from "lucide-react"
-
-interface Table {
-  name: string
-  rowCount: number
-}
+import type { SqlTableSummary } from "@/features/admin/sql-manager/types"
 
 export function SqlManagerClient() {
-  const [tables, setTables] = useState<Table[]>([])
+  const [tables, setTables] = useState<SqlTableSummary[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedTable, setSelectedTable] = useState<string | null>(null)
 
-  const fetchTables = useCallback(async () => {
+  const fetchTables = useCallback(async (preferredTable?: string | null) => {
     try {
       setIsLoading(true)
       const response = await fetch("/api/admin/database/tables")
       if (!response.ok) throw new Error("Failed to fetch tables")
-      const data = await response.json()
-      setTables(data.tables)
-      if (data.tables.length > 0 && !selectedTable) {
-        setSelectedTable(data.tables[0].name)
+      const data = (await response.json()) as { tables: SqlTableSummary[] }
+      const nextTables = data.tables
+      setTables(nextTables)
+
+      const nextSelectedTable =
+        preferredTable ??
+        (selectedTable && nextTables.some((table) => table.name === selectedTable)
+          ? selectedTable
+          : nextTables[0]?.name ?? null)
+
+      if (nextSelectedTable !== selectedTable) {
+        setSelectedTable(nextSelectedTable)
       }
     } catch (error) {
       console.error("Error fetching tables:", error)

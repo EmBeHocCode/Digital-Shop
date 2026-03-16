@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import { redirect } from "next/navigation"
 import { DashboardShell } from "@/components/layout/dashboard-shell"
 import { getAuthSession } from "@/lib/auth"
+import { canAccessManagementDashboard } from "@/lib/auth/role-helpers"
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -14,11 +15,10 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/login?callbackUrl=%2Fdashboard")
   }
 
-  // Allow CUSTOMER and ADMIN roles to access dashboard
-  // CUSTOMER: account pages
-  // ADMIN: admin features like SQL manager
-  const allowedRoles = ["CUSTOMER", "ADMIN"]
-  if (!allowedRoles.includes(session.user.role)) {
+  const canAccessCustomerWorkspace = session.user.role === "CUSTOMER"
+  const canAccessManagementWorkspace = canAccessManagementDashboard(session.user.role)
+
+  if (!canAccessCustomerWorkspace && !canAccessManagementWorkspace) {
     redirect("/access-denied")
   }
 

@@ -42,6 +42,7 @@ enum OrderStatus {
 
 enum PaymentMethod {
   WALLET
+  CARD
   BANK_TRANSFER
   MANUAL_CONFIRMATION
 }
@@ -199,6 +200,7 @@ model User {
   paymentIntents PaymentIntent[]
   refundRequests RefundRequest[]
   securityEvents SecurityEvent[]
+  emailVerificationTokens EmailVerificationToken[]
   passwordResetTokens PasswordResetToken[]
   aiSessions    AiConversationSession[]
   aiRecommendations AiRecommendation[]
@@ -399,6 +401,18 @@ model SecurityEvent {
 }
 
 model PasswordResetToken {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
+}
+
+model EmailVerificationToken {
   id        String   @id @default(uuid()) @db.Uuid
   userId    String   @db.Uuid
   tokenHash String   @unique

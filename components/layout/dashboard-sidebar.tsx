@@ -34,6 +34,8 @@ export function DashboardSidebar() {
     .join("")
 
   const navigationItems = getNavigationForRole(session?.user?.role)
+  const rootHref = session?.user?.role === "CUSTOMER" ? dashboardPages.profile.href : "/dashboard"
+  const groupOrder = ["Workspace", "Commerce", "Admin"] as const
 
   return (
     <Sidebar collapsible="icon">
@@ -41,7 +43,7 @@ export function DashboardSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
-              <Link href="/dashboard">
+              <Link href={rootHref}>
                 <AppLogo
                   className="w-full"
                   subtitle="Marketplace"
@@ -56,7 +58,7 @@ export function DashboardSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {["Workspace", "Commerce"].map((group) => {
+        {groupOrder.map((group) => {
           const items = navigationItems.filter((item) => item.group === group)
 
           if (items.length === 0) {

@@ -42,6 +42,18 @@ export function getOrderPaymentPlan(
     }
   }
 
+  if (method === "card") {
+    return {
+      method,
+      provider: "stripe",
+      paymentStatus: "requires_action",
+      orderStatus: OrderStatus.PENDING,
+      transactionStatus: TransactionStatus.PENDING,
+      instructions: getPaymentInstructions(method, "stripe", "requires_action", reference),
+      requiresWalletBalance: false,
+    }
+  }
+
   if (method === "bank_transfer") {
     return {
       method,

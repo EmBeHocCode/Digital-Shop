@@ -1,5 +1,6 @@
 export const paymentMethodCodes = [
   "wallet",
+  "card",
   "bank_transfer",
   "manual_confirmation",
 ] as const
@@ -22,6 +23,7 @@ export const paymentIntentStatuses = [
   "succeeded",
   "requires_action",
   "failed",
+  "canceled",
 ] as const
 
 export type PaymentMethodCode = (typeof paymentMethodCodes)[number]

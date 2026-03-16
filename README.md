@@ -1,61 +1,94 @@
 # Digital-Shop
 
-Digital-Shop là một dự án `Next.js App Router` đang được nâng cấp dần từ UI prototype thành một digital services marketplace có backend thật, auth, order flow, wallet flow, product configurator, và nền dữ liệu sẵn sàng cho AI.
+Digital-Shop is the main root web application for a digital-services marketplace built with Next.js App Router. The current platform combines a public storefront, product configuration flows, customer account tools, internal admin operations, and a deep Prisma/PostgreSQL schema that is already prepared for payments, fulfillment, analytics, and future AI integrations.
 
-Repo này đang được phát triển theo hướng incremental:
+The repository also contains:
 
-- không rewrite toàn bộ app
-- refactor theo phase
-- giữ UI public hoạt động ổn định trong lúc mở rộng backend và data layer
+- [`bot-AI/apps`](./bot-AI/apps): a separate AI bot workspace for future integration
+- [`ai-service`](./ai-service): supporting AI service/infrastructure code
 
-## Trạng thái hiện tại
+Those workspaces are intentionally separate. The main shipping web application lives in the repository root.
 
-Main app hiện đã có:
+## Current Platform Scope
 
-- public landing page
-- public services catalog
-- role-aware auth redirect và public navigation
-- service detail pages với configurator theo từng loại sản phẩm
-- login / register
-- anti-bot check ở login
-- protected dashboard
-- cart / checkout / order success flow
-- order + wallet foundation có API thật
-- admin SQL manager foundation
-- Prisma + PostgreSQL + Auth.js foundation
-- schema và service foundation mở rộng cho inventory / profitability / market intelligence / AI
+### Public storefront
 
-Các lệnh kiểm tra hiện đang pass:
+- marketing landing page
+- services catalog
+- detailed service pages for:
+  - VPS
+  - Cloud Server
+  - Giftcard
+  - Game Cards
+  - SIM numbers
+  - Phone recharge / top-up
 
-- `corepack pnpm lint`
-- `corepack pnpm exec tsc --noEmit`
-- `corepack pnpm build`
+### Commerce and account
 
-Lưu ý:
+- login and registration
+- email verification
+- forgot/reset password
+- cart and checkout
+- order creation and order history
+- wallet summary and transaction history
+- purchased products
+- billing overview
+- profile and settings
 
-- `bot-AI/` là workspace riêng, không phải phần build chính của web app
-- web app chính nằm ở root repo này
+### Internal operations
 
-## Những gì đang có trên web
+- role-aware management area under `/dashboard/admin`
+- admin orders management
+- admin users/customer management
+- admin wallet/transaction operations
+- admin products management
+- internal SQL manager tooling
+
+### Platform/data foundation
+
+- Prisma + PostgreSQL
+- NextAuth credentials auth
+- Stripe card-payment integration foundation with webhook handling
+- wallet/manual payment paths
+- fulfillment and digital-delivery schema foundation
+- analytics, inventory, market, and AI-ready data models
+
+## Current Feature Summary
+
+| Domain | Current state |
+| --- | --- |
+| Public landing | Implemented and visually polished |
+| Services catalog | Implemented with Prisma-backed reads plus safe fallback content |
+| Product configurator | Strong for all six product types, but still largely code-driven |
+| Auth | Implemented: login, register, anti-bot login challenge, email verification, forgot/reset password |
+| Customer account | Implemented: profile, settings, orders, wallet, billing, purchased products |
+| Checkout and orders | Implemented with server-side price recalculation and persisted order item configuration |
+| Wallet | Implemented foundation with balances, transactions, and top-up request flow |
+| Billing | Implemented foundation with payment history and invoice-like records derived from paid orders |
+| Payment | Stripe card checkout plus webhook sync; wallet and manual transfer flows also exist |
+| Admin/operations | Implemented foundation for orders, users, wallet, products, and SQL manager |
+| Fulfillment | Schema foundation exists, runtime automation is still partial |
+| AI/data foundation | Strong schema/services foundation, but no root-app AI UI yet |
+
+## Current Route Map
 
 ### Public routes
 
 - `/`
 - `/access-denied`
 - `/services`
-- `/services/vps`
-- `/services/cloud-server`
-- `/services/giftcard`
-- `/services/game-cards`
-- `/services/sim`
-- `/services/topup`
+- `/services/[slug]`
 - `/login`
 - `/register`
+- `/forgot-password`
+- `/reset-password`
+- `/verify-email`
+- `/verify-email/pending`
 - `/cart`
 - `/checkout`
 - `/order/success`
 
-### Protected routes
+### Authenticated customer/account routes
 
 - `/dashboard`
 - `/dashboard/profile`
@@ -66,121 +99,41 @@ Lưu ý:
 - `/dashboard/purchased-products/[productId]`
 - `/dashboard/billing`
 - `/dashboard/settings`
+
+### Internal admin routes
+
+- `/dashboard/admin`
+- `/dashboard/admin/orders`
+- `/dashboard/admin/orders/[orderId]`
+- `/dashboard/admin/users`
+- `/dashboard/admin/users/[userId]`
+- `/dashboard/admin/wallet`
+- `/dashboard/admin/products`
 - `/dashboard/admin/sql-manager`
 
-### API routes
+### Important API areas
 
 - `/api/auth/[...nextauth]`
 - `/api/auth/register`
+- `/api/auth/verify-email`
+- `/api/auth/resend-verification`
+- `/api/auth/forgot-password`
+- `/api/auth/reset-password`
 - `/api/orders`
+- `/api/payments/stripe/webhook`
 - `/api/wallet`
 - `/api/wallet/topups`
 - `/api/account/settings`
-- `/api/admin/database/tables`
-- `/api/admin/database/columns`
-- `/api/admin/database/rows`
-- `/api/admin/database/query`
+- `/api/admin/orders/[orderId]`
+- `/api/admin/users/[userId]`
+- `/api/admin/wallet/adjustments`
+- `/api/admin/products`
+- `/api/admin/products/[productId]`
+- `/api/admin/database/*`
 
-## Tính năng đã có
+## Architecture Overview
 
-### 1. Public landing + catalog
-
-- landing page với hero, services, features, pricing, benefits, testimonials, FAQ
-- CTA public đổi theo role/session hiện tại
-- catalog công khai cho 6 nhóm dịch vụ
-- service detail pages thật, không còn chỉ là section trên landing
-- routing public đã nối đồng bộ giữa header, CTA, catalog và dashboard
-- navigation public đã được chỉnh để tránh load lặp khó chịu ở `/services` khi dev local
-
-### 2. Product configurator
-
-Hiện app đã support trải nghiệm mua hàng riêng cho:
-
-- VPS
-- Cloud Server
-- Giftcard
-- Game Cards
-- SIM numbers
-- Phone recharge / top-up
-
-Các product pages hiện có:
-
-- summary / highlights / ideal-for / operations
-- option selectors theo loại sản phẩm
-- dynamic pricing summary
-- add-to-cart theo cấu hình
-- loading states cho route detail
-
-### 3. Auth + account
-
-- credentials login qua Auth.js
-- register flow thật
-- password hashing
-- duplicate email validation
-- auto-create wallet khi đăng ký
-- redirect sau login/register theo role và `callbackUrl`
-- tài khoản thường không còn mặc định bị đẩy vào dashboard
-- shortcut `Dashboard` ở public header chỉ hiện cho tài khoản có quyền quản lý
-- dashboard bảo vệ bằng session
-- login anti-bot challenge
-- access denied state cho route bị chặn theo role
-- profile page riêng trong dashboard
-- settings page cập nhật profile thật
-
-### 4. Cart / checkout / orders
-
-- cart state bằng Zustand
-- add / remove / update quantity / clear cart
-- support nhiều cấu hình cho cùng một `slug`
-- checkout tạo `Order`, `OrderItem`, `Transaction`
-- server-side recalculation giá
-- order success page
-- config mua hàng đã persist vào `OrderItem`
-- order detail page cho từng đơn trong dashboard
-
-### 5. Wallet / billing / purchased products
-
-- wallet summary
-- transaction history
-- top-up request foundation
-- billing overview
-- purchased products page
-- dashboard orders page
-- purchased product detail page
-- profile / billing / settings pages đã nối đồng bộ trong dashboard
-
-### 6. Admin / internal tooling
-
-- admin SQL manager trong dashboard
-- API đọc tables / columns / rows
-- API query database nội bộ
-- phục vụ inspect dữ liệu và debug trong môi trường nội bộ
-
-### 7. Data + AI foundation
-
-Schema hiện đã mở rộng cho:
-
-- marketing content
-- product options / denominations / SIM inventory
-- persisted cart foundation
-- user preferences / security events / reset tokens
-- payment intents / refunds / fulfillment
-- inventory / cost / price / sales / market / forecast snapshots
-- AI conversation / recommendation storage
-
-Service foundation hiện có:
-
-- `getMarketingContent`
-- `getProductCommerceContext`
-- `getUserCart`
-- `getUserPreferences`
-- `getBusinessIntelligenceContext`
-
-Mục tiêu của foundation này là để sau này tích hợp bot AI vào web mà không phải query raw tables trực tiếp từ UI hoặc automation.
-
-## Kiến trúc hiện tại
-
-High-level repo shape:
+The active application is organized around the root App Router and feature modules:
 
 ```text
 app/
@@ -194,6 +147,7 @@ components/
   ui/
 features/
   account/
+  admin/
   ai/
   auth/
   cart/
@@ -203,216 +157,157 @@ features/
   orders/
   payment/
   wallet/
-hooks/
 lib/
   auth/
   constants/
   db/
-  validations/
+  mail/
+  payments/
 prisma/
 store/
+types/
 docs/
-agents/
-bot-AI/
 ```
 
-Nguyên tắc tổ chức hiện tại:
+Key notes:
 
-- routing ở `app/`
-- reusable primitives ở `components/ui`
-- layout shells ở `components/layout`
-- logic theo domain ở `features/*`
-- data access ở `features/*/services` hoặc `lib/*`
-- mở rộng dần theo use case thật, tránh over-engineering
+- [`app`](./app) is the active web application
+- [`src`](./src) still contains legacy/older route trees and admin code, but it is not the active shipping app
+- [`bot-AI/apps`](./bot-AI/apps) is a separate AI bot workspace
+- [`ai-service`](./ai-service) is separate service/infrastructure code
 
-## Tiến trình theo phase
+## Tech Stack
 
-### Phase 0 - Ổn định dự án
+### Frontend
 
-- khôi phục môi trường chạy
-- sửa dependency / TypeScript issues
-- thêm script `dev:3001`
-- đưa project về trạng thái build được
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- Radix UI primitives
+- Recharts
 
-### Phase 1 - Refactor structure + public product routes
+### Backend
 
-- refactor repo sang `app + components + features`
-- tạo `app/(public)` và `app/dashboard`
-- chuyển layout/shared/dashboard/landing components vào đúng chỗ
-- tạo `/services` và `/services/[slug]`
-- nối landing sang page dịch vụ thật
-- chỉnh charts đồng bộ dark/light
+- Next.js route handlers
+- Prisma 7
+- PostgreSQL
+- NextAuth credentials auth
+- Nodemailer
+- Stripe
 
-### Phase 2 - Auth + database foundation
+### State and forms
 
-- thêm Prisma + PostgreSQL + Auth.js
-- tạo schema nền:
-  - `User`
-  - `Product`
-  - `Order`
-  - `OrderItem`
-  - `Wallet`
-  - `Transaction`
-- thêm Prisma config, Prisma client singleton, auth route, password helpers
+- Zustand
+- React Hook Form
+- Zod
 
-### Phase 3 - Auth UI + protected dashboard + cart flow
+### Tooling
 
-- build `/login`
-- build `/register`
-- triển khai registration flow thật
-- bảo vệ `/dashboard`
-- thêm cart store
-- build `/cart`
-- build `/checkout`
-- build `/order/success`
+- pnpm
+- ESLint
+- TypeScript typecheck
+- Prisma seed/generate/db push scripts
+- Docker Compose for local Postgres
 
-### Phase 4 - Prisma-backed catalog + query/services foundation
+## Setup and Run
 
-- catalog đọc từ Prisma khi DB sẵn sàng
-- fallback an toàn khi DB chưa có data
-- thêm seed products
-- thêm query/service layer cho:
-  - catalog
-  - orders
-  - wallet
-  - billing
-  - settings
+### 1. Install dependencies
 
-### Phase 5 - Orders + wallet + payment foundation
+```bash
+corepack enable
+corepack pnpm install
+```
 
-- real order creation từ checkout
-- `Order` / `OrderItem` / `Transaction` flow thật
-- wallet summary + transaction history + top-up request foundation
-- protected dashboard pages cho orders và wallet
-- payment foundation nhưng chưa gắn gateway thật
+### 2. Configure environment
 
-### Phase 6 - Product configurator + full account experience
+Copy [`/.env.example`](./.env.example) to `.env.local` and fill in the values you need.
 
-- configurator cho 6 loại sản phẩm
-- config-aware cart / checkout / order success
-- thêm dashboard pages:
-  - `purchased-products`
-  - `billing`
-  - `settings`
-- update profile qua API thật
+Important variables include:
 
-### Phase 7 - Database scope expansion + AI-ready foundation
+- `DATABASE_URL`
+- `AUTH_SECRET`
+- `NEXTAUTH_URL`
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `MAIL_FROM`
+- `MAIL_REPLY_TO`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_SECURE`
+- `SMTP_USER`
+- `SMTP_PASS`
 
-- mở rộng Prisma schema cho marketing, product options, inventory, account preferences, payment, fulfillment, analytics, AI
-- thêm shared data / seed foundation
-- thêm service entry points cho marketing, commerce context, cart, preferences, business intelligence
-- giữ fallback an toàn để web không bị buộc database-first quá sớm
+### 3. Start local database
 
-### Phase 8 - Dashboard detail pages + repo quality gate cleanup
+If you use the provided Docker setup:
 
-- thêm `/dashboard/profile`
-- thêm `/dashboard/orders/[orderId]`
-- thêm `/dashboard/purchased-products/[productId]`
-- thêm reusable detail UI cho dashboard
-- đọc lại persisted config từ `OrderItem.metadata`
-- dọn repo config để `lint`, `tsc`, `build` phản ánh đúng app đang ship
+```bash
+corepack pnpm run db:up
+```
 
-### Phase 9 - Role-based access polish + admin DB tooling foundation
-
-- redirect sau login/register theo role:
-  - tài khoản quản lý -> `/dashboard`
-  - tài khoản thường -> `/`
-- public header chỉ hiện `Dashboard` cho tài khoản có quyền quản lý
-- thêm `/access-denied`
-- hero CTA đổi theo role/session
-- hoàn thiện `/dashboard/admin/sql-manager`
-- thêm admin database APIs cho tables / columns / rows / query
-
-## Dữ liệu hiện đang nằm ở đâu
-
-Hiện web đang dùng 3 nguồn dữ liệu chính:
-
-1. `PostgreSQL qua Prisma`
-- user
-- auth
-- product catalog khi DB sẵn sàng
-- order / wallet / transaction / billing / settings
-- inventory / analytics / AI-ready foundation
-
-2. `File code tĩnh`
-- landing marketing content
-- fallback catalog content
-- product configurator options
-- một phần chart/demo dashboard data
-
-3. `Browser localStorage`
-- cart runtime state
-- local fallback cho một số UX trong cart/order success
-
-Chi tiết hơn xem ở:
-
-- [docs/DATABASE_SCOPE_MAP.md](./docs/DATABASE_SCOPE_MAP.md)
-
-## Local development
-
-Yêu cầu:
-
-- Node.js
-- `pnpm` qua `corepack`
-- PostgreSQL local hoặc Docker
-
-### Cách chạy local nhanh nhất
-
-1. Bật PostgreSQL hoặc start container Docker đang dùng cho local.
-2. Tạo file `.env.local`.
-3. Đồng bộ schema:
+### 4. Sync schema and seed data
 
 ```bash
 corepack pnpm run db:push
-```
-
-4. Seed dữ liệu nền:
-
-```bash
 corepack pnpm run db:seed
 ```
 
-5. Chạy app:
+### 5. Run the app
 
 ```bash
 corepack pnpm run dev:3001
 ```
 
-6. Mở một trong các địa chỉ:
+Open:
 
 - `http://localhost:3001`
-- `http://192.168.1.2:3001`
+- or your current LAN URL if you are testing across devices
 
-### Script hữu ích
+## Common Commands
 
 ```bash
 corepack pnpm run dev:3001
 corepack pnpm run build
 corepack pnpm run lint
+corepack pnpm exec tsc --noEmit
 corepack pnpm run db:generate
 corepack pnpm run db:push
 corepack pnpm run db:migrate
 corepack pnpm run db:seed
 corepack pnpm run db:studio
+corepack pnpm run db:down
 ```
 
-## Tài liệu liên quan
+## Current Status and Known Gaps
 
+The project is beyond prototype stage and is now an advanced MVP / pre-production operations build. The strongest areas are the storefront, configurators, account flows, order/wallet foundation, and the breadth of the Prisma schema.
+
+The biggest current gaps are:
+
+- fulfillment automation is not fully implemented
+- invoice/export/tax-grade billing is still incomplete
+- wallet top-up settlement is still review/manual
+- customer settings do not yet support password change, avatar upload, or device/session management
+- admin product management does not yet manage deep commerce data such as option groups, denominations, SIM inventory, media, or FAQs
+- there is no dedicated admin billing/reconciliation page yet
+- the root app has AI-ready data/services, but no end-user AI assistant UI yet
+- legacy code still exists under [`src`](./src) and can confuse maintenance if not clearly treated as inactive
+
+## Recommended Next Steps
+
+1. Build fulfillment automation around `ServiceProvision` and `DigitalDelivery`.
+2. Add billing/reconciliation operations and real invoice export.
+3. Expand admin product operations to manage options, inventory, media, and FAQs from the root app.
+4. Improve account security lifecycle with password change, session/device management, and richer preferences.
+5. Decide whether the customer area should eventually move from `/dashboard/*` to a clearer `/account/*` model while preserving compatibility.
+
+## Documentation
+
+- [Current project audit](./docs/CURRENT_PROJECT_AUDIT.md)
 - [Project status overview](./docs/PROJECT_STATUS_OVERVIEW.md)
 - [Database scope map](./docs/DATABASE_SCOPE_MAP.md)
-- [AGENTS guide](./AGENTS.md)
+- [Agents guide](./AGENTS.md)
 
-## Hướng tiếp theo hợp lý
-
-Các hướng phát triển tiếp theo đã được chuẩn bị nền:
-
-- full admin / product management ngoài SQL manager foundation
-- inventory optimization
-- profitability analytics
-- market trend forecasting
-- AI assistant / AI bot tích hợp trực tiếp vào web
-- payment provider thật
-- invoice / export flow
-- tách rõ hơn customer dashboard và management workspace nếu cần
-
-Mục tiêu dài hạn của repo không còn là demo UI, mà là một nền tảng digital commerce có dữ liệu thật và sẵn sàng cho automation + AI.

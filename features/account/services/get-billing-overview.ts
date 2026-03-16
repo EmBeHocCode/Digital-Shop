@@ -1,4 +1,4 @@
-import { OrderStatus, Prisma, TransactionStatus, TransactionType } from "@prisma/client"
+import { Prisma, TransactionStatus, TransactionType } from "@prisma/client"
 import { cache } from "react"
 import { getPrismaClient } from "@/lib/db/prisma"
 import { formatCurrency } from "@/lib/utils"
@@ -94,7 +94,7 @@ export const getBillingOverview = cache(async (userId: string) => {
         prisma.order.aggregate({
           where: {
             userId,
-            status: OrderStatus.COMPLETED,
+            paymentStatus: TransactionStatus.COMPLETED,
           },
           _sum: {
             totalAmount: true,

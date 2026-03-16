@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { signOut, useSession } from "next-auth/react"
-import { LayoutDashboard, LogOut, Menu, X } from "lucide-react"
+import { LayoutDashboard, LogOut, Menu, UserRound, X } from "lucide-react"
 import { CartLink } from "@/features/cart/components/cart-link"
 import { AppLogo } from "@/components/shared/app-logo"
 import { ThemeToggle } from "@/components/shared/theme-toggle"
@@ -22,6 +22,7 @@ export function PublicHeader() {
   const [scrolled, setScrolled] = useState(false)
   const { data: session, status } = useSession()
   const isAuthenticated = status === "authenticated"
+  const canOpenProfile = isAuthenticated
   const canOpenDashboard = canAccessManagementDashboard(session?.user?.role)
 
   useEffect(() => {
@@ -71,6 +72,14 @@ export function PublicHeader() {
           <CartLink />
           {isAuthenticated ? (
             <>
+              {canOpenProfile ? (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link href="/dashboard/profile">
+                    <UserRound className="size-4" />
+                    Tài khoản
+                  </Link>
+                </Button>
+              ) : null}
               {canOpenDashboard ? (
                 <Button variant="ghost" size="sm" asChild>
                   <Link href="/dashboard">
@@ -130,6 +139,14 @@ export function PublicHeader() {
               <CartLink />
               {isAuthenticated ? (
                 <>
+                  {canOpenProfile ? (
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/dashboard/profile" onClick={() => setMobileMenuOpen(false)}>
+                        <UserRound className="size-4" />
+                        Tài khoản
+                      </Link>
+                    </Button>
+                  ) : null}
                   {canOpenDashboard ? (
                     <Button variant="outline" className="w-full" asChild>
                       <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>

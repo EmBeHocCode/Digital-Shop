@@ -1,8 +1,23 @@
 # Database Scope Map
 
+Last updated: 2026-03-16
+
 ## Purpose
 
 Tài liệu này liệt kê toàn bộ dữ liệu đang xuất hiện trên web `Digital-Shop`, dữ liệu đó hiện đang nằm ở đâu, và dữ liệu nào cần được đưa vào PostgreSQL để web có nền dữ liệu thật thay vì chỉ dựa vào file tĩnh hoặc local store.
+
+Important note:
+
+- file này tập trung vào bản đồ dữ liệu và nguồn dữ liệu
+- nó không còn là tài liệu route/feature audit đầy đủ của root web app
+- các luồng runtime mới hơn như:
+  - email verification
+  - forgot/reset password
+  - Stripe webhook/payment sync
+  - admin operations trong root app router
+  - order detail / purchased-product detail / admin routes
+  đã được mô tả chính xác hơn trong [CURRENT_PROJECT_AUDIT.md](./CURRENT_PROJECT_AUDIT.md)
+- khi nội dung của file này và audit report mới có khác biệt, hãy coi audit report mới là nguồn trạng thái hiện hành
 
 Mục tiêu của tài liệu:
 
@@ -59,11 +74,11 @@ Tính đến `2026-03-14`, database foundation đã được mở rộng thêm c
 
 ### Service entry points đã có
 
-- [get-marketing-content.ts](/D:/IT-DEVELOPER/Digital-Shop/features/landing/services/get-marketing-content.ts)
-- [get-product-commerce-context.ts](/D:/IT-DEVELOPER/Digital-Shop/features/catalog/services/get-product-commerce-context.ts)
-- [get-user-cart.ts](/D:/IT-DEVELOPER/Digital-Shop/features/cart/services/get-user-cart.ts)
-- [get-user-preferences.ts](/D:/IT-DEVELOPER/Digital-Shop/features/account/services/get-user-preferences.ts)
-- [get-business-intelligence-context.ts](/D:/IT-DEVELOPER/Digital-Shop/features/ai/services/get-business-intelligence-context.ts)
+- [get-marketing-content.ts](../features/landing/services/get-marketing-content.ts)
+- [get-product-commerce-context.ts](../features/catalog/services/get-product-commerce-context.ts)
+- [get-user-cart.ts](../features/cart/services/get-user-cart.ts)
+- [get-user-preferences.ts](../features/account/services/get-user-preferences.ts)
+- [get-business-intelligence-context.ts](../features/ai/services/get-business-intelligence-context.ts)
 
 ### Important note
 
@@ -91,18 +106,18 @@ Tính đến `2026-03-14`, database foundation đã được mở rộng thêm c
 
 Các section landing hiện đang là content tĩnh trong component files:
 
-- [hero.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/hero.tsx)
-- [services.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/services.tsx)
-- [features.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/features.tsx)
-- [pricing.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/pricing.tsx)
-- [benefits.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/benefits.tsx)
-- [logo-cloud.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/logo-cloud.tsx)
-- [testimonials.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/testimonials.tsx)
-- [faq.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/landing/components/faq.tsx)
+- [hero.tsx](../features/landing/components/hero.tsx)
+- [services.tsx](../features/landing/components/services.tsx)
+- [features.tsx](../features/landing/components/features.tsx)
+- [pricing.tsx](../features/landing/components/pricing.tsx)
+- [benefits.tsx](../features/landing/components/benefits.tsx)
+- [logo-cloud.tsx](../features/landing/components/logo-cloud.tsx)
+- [testimonials.tsx](../features/landing/components/testimonials.tsx)
+- [faq.tsx](../features/landing/components/faq.tsx)
 
-Thư mục [features/landing/data](/D:/IT-DEVELOPER/Digital-Shop/features/landing/data) hiện đã có source dữ liệu chia sẻ:
+Thư mục [features/landing/data](../features/landing/data) hiện đã có source dữ liệu chia sẻ:
 
-- [marketing-content.ts](/D:/IT-DEVELOPER/Digital-Shop/features/landing/data/marketing-content.ts)
+- [marketing-content.ts](../features/landing/data/marketing-content.ts)
 
 ### Data currently shown on web
 
@@ -123,7 +138,7 @@ Thư mục [features/landing/data](/D:/IT-DEVELOPER/Digital-Shop/features/landin
 
 và query layer:
 
-- [get-marketing-content.ts](/D:/IT-DEVELOPER/Digital-Shop/features/landing/services/get-marketing-content.ts)
+- [get-marketing-content.ts](../features/landing/services/get-marketing-content.ts)
 
 UI landing hiện vẫn render từ component/static content để giữ giao diện ổn định.
 
@@ -166,11 +181,11 @@ Lý do:
 Catalog đang chạy kiểu hybrid:
 
 1. `DB nếu có DATABASE_URL và DB chạy được`
-- query service: [get-products.ts](/D:/IT-DEVELOPER/Digital-Shop/features/catalog/services/get-products.ts)
+- query service: [get-products.ts](../features/catalog/services/get-products.ts)
 
 2. `Fallback về file tĩnh nếu DB chưa sẵn sàng`
-- content: [catalog-content.ts](/D:/IT-DEVELOPER/Digital-Shop/features/catalog/data/catalog-content.ts)
-- mapping/icon/summary: [catalog-data.ts](/D:/IT-DEVELOPER/Digital-Shop/features/catalog/data/catalog-data.ts)
+- content: [catalog-content.ts](../features/catalog/data/catalog-content.ts)
+- mapping/icon/summary: [catalog-data.ts](../features/catalog/data/catalog-data.ts)
 
 ### Data currently shown on web
 
@@ -212,9 +227,9 @@ Mỗi sản phẩm hiện có:
 - `imageUrl`
 - `metadata`
 
-Schema nằm ở [schema.prisma](/D:/IT-DEVELOPER/Digital-Shop/prisma/schema.prisma).
+Schema nằm ở [schema.prisma](../prisma/schema.prisma).
 
-Seed hiện có ở [seed.ts](/D:/IT-DEVELOPER/Digital-Shop/prisma/seed.ts), seed từ `catalogProductContent`.
+Seed hiện có ở [seed.ts](../prisma/seed.ts), seed từ `catalogProductContent`.
 
 ### Important note
 
@@ -246,7 +261,7 @@ Nếu muốn scale thật hơn sau này, nên mở rộng thêm:
 
 Toàn bộ option configurator hiện nằm trong file tĩnh:
 
-- [product-purchase.ts](/D:/IT-DEVELOPER/Digital-Shop/features/catalog/product-purchase.ts)
+- [product-purchase.ts](../features/catalog/product-purchase.ts)
 
 ### Data currently shown on web
 
@@ -293,7 +308,7 @@ Toàn bộ option configurator hiện nằm trong file tĩnh:
 
 và query layer:
 
-- [get-product-commerce-context.ts](/D:/IT-DEVELOPER/Digital-Shop/features/catalog/services/get-product-commerce-context.ts)
+- [get-product-commerce-context.ts](../features/catalog/services/get-product-commerce-context.ts)
 
 UI configurator hiện vẫn render từ code/purchase engine tĩnh, nhưng data model đã sẵn để chuyển dần sang database.
 
@@ -332,16 +347,16 @@ Nên tách 2 lớp:
 ### Current source
 
 Frontend:
-- [login-form.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/auth/components/login-form.tsx)
-- [register-form.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/auth/components/register-form.tsx)
+- [login-form.tsx](../features/auth/components/login-form.tsx)
+- [register-form.tsx](../features/auth/components/register-form.tsx)
 
 Validation:
-- [validations.ts](/D:/IT-DEVELOPER/Digital-Shop/features/auth/validations.ts)
+- [validations.ts](../features/auth/validations.ts)
 
 Backend:
-- [auth-options.ts](/D:/IT-DEVELOPER/Digital-Shop/lib/auth/auth-options.ts)
-- [register-user.ts](/D:/IT-DEVELOPER/Digital-Shop/features/auth/actions/register-user.ts)
-- [route.ts](/D:/IT-DEVELOPER/Digital-Shop/app/api/auth/register/route.ts)
+- [auth-options.ts](../lib/auth/auth-options.ts)
+- [register-user.ts](../features/auth/actions/register-user.ts)
+- [route.ts](../app/api/auth/register/route.ts)
 
 ### DB entities used
 
@@ -389,7 +404,7 @@ Cart đang không dùng DB.
 
 Nguồn là Zustand persisted store:
 
-- [use-cart-store.ts](/D:/IT-DEVELOPER/Digital-Shop/store/use-cart-store.ts)
+- [use-cart-store.ts](../store/use-cart-store.ts)
 
 ### Data stored locally
 
@@ -422,7 +437,7 @@ Mỗi line item hiện giữ:
 
 và service foundation:
 
-- [get-user-cart.ts](/D:/IT-DEVELOPER/Digital-Shop/features/cart/services/get-user-cart.ts)
+- [get-user-cart.ts](../features/cart/services/get-user-cart.ts)
 
 Hiện web vẫn dùng Zustand + `localStorage` cho cart đang thao tác để giữ UX nhẹ và không phụ thuộc DB ở local dev.
 
@@ -483,10 +498,10 @@ Không cần `Checkout` table riêng ở giai đoạn này, trừ khi sau này c
 ### Current source
 
 Order creation:
-- [create-user-order.ts](/D:/IT-DEVELOPER/Digital-Shop/features/orders/services/create-user-order.ts)
+- [create-user-order.ts](../features/orders/services/create-user-order.ts)
 
 Order reads:
-- [get-user-orders.ts](/D:/IT-DEVELOPER/Digital-Shop/features/orders/services/get-user-orders.ts)
+- [get-user-orders.ts](../features/orders/services/get-user-orders.ts)
 
 Routes / pages:
 - `/api/orders`
@@ -559,9 +574,9 @@ Fields hiện có:
 
 Services:
 
-- [get-wallet-summary.ts](/D:/IT-DEVELOPER/Digital-Shop/features/wallet/services/get-wallet-summary.ts)
-- [get-transaction-history.ts](/D:/IT-DEVELOPER/Digital-Shop/features/wallet/services/get-transaction-history.ts)
-- [create-topup-request.ts](/D:/IT-DEVELOPER/Digital-Shop/features/wallet/services/create-topup-request.ts)
+- [get-wallet-summary.ts](../features/wallet/services/get-wallet-summary.ts)
+- [get-transaction-history.ts](../features/wallet/services/get-transaction-history.ts)
+- [create-topup-request.ts](../features/wallet/services/create-topup-request.ts)
 
 Pages:
 
@@ -608,8 +623,8 @@ Fields hiện có:
 
 Services:
 
-- [get-billing-overview.ts](/D:/IT-DEVELOPER/Digital-Shop/features/account/services/get-billing-overview.ts)
-- [get-transaction-history.ts](/D:/IT-DEVELOPER/Digital-Shop/features/wallet/services/get-transaction-history.ts)
+- [get-billing-overview.ts](../features/account/services/get-billing-overview.ts)
+- [get-transaction-history.ts](../features/wallet/services/get-transaction-history.ts)
 
 Pages:
 
@@ -664,7 +679,7 @@ Fields hiện có:
 ### Current source
 
 Service:
-- [get-purchased-products.ts](/D:/IT-DEVELOPER/Digital-Shop/features/account/services/get-purchased-products.ts)
+- [get-purchased-products.ts](../features/account/services/get-purchased-products.ts)
 
 Page:
 - `/dashboard/purchased-products`
@@ -705,10 +720,10 @@ Chỉ tạo bảng riêng nếu sau này cần:
 ### Current source
 
 Service:
-- [get-user-settings.ts](/D:/IT-DEVELOPER/Digital-Shop/features/account/services/get-user-settings.ts)
+- [get-user-settings.ts](../features/account/services/get-user-settings.ts)
 
 API:
-- [route.ts](/D:/IT-DEVELOPER/Digital-Shop/app/api/account/settings/route.ts)
+- [route.ts](../app/api/account/settings/route.ts)
 
 Page:
 - `/dashboard/settings`
@@ -744,7 +759,7 @@ Fields đang dùng ở settings:
 
 và service:
 
-- [get-user-preferences.ts](/D:/IT-DEVELOPER/Digital-Shop/features/account/services/get-user-preferences.ts)
+- [get-user-preferences.ts](../features/account/services/get-user-preferences.ts)
 
 Nhưng UI settings hiện mới chỉ dùng profile cơ bản. Nếu scale account/settings tiếp, nên cân nhắc thêm:
 
@@ -776,7 +791,7 @@ Dashboard overview hiện là mix giữa:
 ### DB-backed parts
 
 Page:
-- [app/dashboard/page.tsx](/D:/IT-DEVELOPER/Digital-Shop/app/dashboard/page.tsx)
+- [app/dashboard/page.tsx](../app/dashboard/page.tsx)
 
 Các service thật đang cấp dữ liệu:
 
@@ -788,10 +803,10 @@ Các service thật đang cấp dữ liệu:
 
 ### Mock/demo parts
 
-- [analytics-cards.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/dashboard/components/analytics-cards.tsx)
-- [revenue-chart.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/dashboard/components/revenue-chart.tsx)
-- [sessions-chart.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/dashboard/components/sessions-chart.tsx)
-- [recent-activity.tsx](/D:/IT-DEVELOPER/Digital-Shop/features/dashboard/components/recent-activity.tsx)
+- [analytics-cards.tsx](../features/dashboard/components/analytics-cards.tsx)
+- [revenue-chart.tsx](../features/dashboard/components/revenue-chart.tsx)
+- [sessions-chart.tsx](../features/dashboard/components/sessions-chart.tsx)
+- [recent-activity.tsx](../features/dashboard/components/recent-activity.tsx)
 
 ### Recommendation
 
@@ -819,7 +834,7 @@ Hiện tại chưa cần vì web chưa có nguồn traffic/event thật.
 
 ### Current service entry point
 
-- [get-business-intelligence-context.ts](/D:/IT-DEVELOPER/Digital-Shop/features/ai/services/get-business-intelligence-context.ts)
+- [get-business-intelligence-context.ts](../features/ai/services/get-business-intelligence-context.ts)
 
 ### Current schema foundation
 
@@ -1010,3 +1025,4 @@ Nói cách khác:
 
 - phần commerce cốt lõi nên vào DB trước
 - phần marketing content không nên làm trước phần order/wallet/product inventory
+

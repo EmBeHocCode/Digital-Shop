@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation"
 import { getAuthSession } from "@/lib/auth"
 import { SqlManagerClient } from "@/features/admin/sql-manager/sql-manager-client"
+import { canManageSystemSettings } from "@/lib/auth/role-helpers"
 
 export const metadata = {
   title: "SQL Manager",
@@ -10,7 +11,7 @@ export const metadata = {
 export default async function SqlManagerPage() {
   const session = await getAuthSession()
 
-  if (!session?.user?.id || session.user.role !== "ADMIN") {
+  if (!session?.user?.id || !canManageSystemSettings(session.user.role)) {
     redirect("/access-denied")
   }
 

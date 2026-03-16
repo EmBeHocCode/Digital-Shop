@@ -56,12 +56,13 @@ export async function POST(request: Request) {
   }
 
   try {
-    const order = await createUserOrder(session.user.id, payload)
+    const result = await createUserOrder(session.user.id, payload, request)
 
     return NextResponse.json(
       {
         success: true,
-        order,
+        order: result.order,
+        payment: result.payment,
       },
       { status: 201 }
     )

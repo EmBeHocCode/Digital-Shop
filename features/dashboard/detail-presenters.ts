@@ -88,10 +88,16 @@ export function getDeliveryStatusPresentation(
 
 export function getUserRolePresentation(role: string): DetailStatusPresentation {
   switch (role) {
+    case "SUPERADMIN":
+      return { label: "Superadmin", tone: "violet" }
     case "ADMIN":
       return { label: "Admin", tone: "violet" }
-    case "USER":
-      return { label: "User", tone: "neutral" }
+    case "MANAGER":
+      return { label: "Manager", tone: "info" }
+    case "STAFF":
+      return { label: "Staff", tone: "warning" }
+    case "CUSTOMER":
+      return { label: "Customer", tone: "neutral" }
     default:
       return { label: role, tone: "neutral" }
   }
@@ -123,5 +129,61 @@ export function getDomainPresentation(domain: string) {
         label: "Digital goods",
         tone: "border-violet-500/30 bg-violet-500/10 text-violet-700 dark:text-violet-300",
       }
+  }
+}
+
+export function getProductStatusPresentation(status: string): DetailStatusPresentation {
+  switch (status) {
+    case "ACTIVE":
+      return { label: "Đang bán", tone: "success" }
+    case "DRAFT":
+      return { label: "Nháp", tone: "warning" }
+    case "ARCHIVED":
+      return { label: "Đã lưu trữ", tone: "danger" }
+    default:
+      return { label: status, tone: "neutral" }
+  }
+}
+
+export function getWalletStatusPresentation(status: string): DetailStatusPresentation {
+  switch (status) {
+    case "ACTIVE":
+      return { label: "Hoạt động", tone: "success" }
+    case "LOCKED":
+      return { label: "Đã khóa", tone: "danger" }
+    case "CLOSED":
+      return { label: "Đã đóng", tone: "warning" }
+    default:
+      return { label: status, tone: "neutral" }
+  }
+}
+
+export function getTransactionStatusPresentation(status: string): DetailStatusPresentation {
+  switch (status) {
+    case "COMPLETED":
+      return { label: "Hoàn tất", tone: "success" }
+    case "PENDING":
+      return { label: "Chờ xử lý", tone: "warning" }
+    case "FAILED":
+      return { label: "Thất bại", tone: "danger" }
+    case "CANCELLED":
+      return { label: "Đã hủy", tone: "danger" }
+    default:
+      return { label: status, tone: "neutral" }
+  }
+}
+
+export function getTransactionTypePresentation(type: string): DetailStatusPresentation {
+  switch (type) {
+    case "TOPUP":
+      return { label: "Nạp ví", tone: "info" }
+    case "PAYMENT":
+      return { label: "Thanh toán", tone: "warning" }
+    case "REFUND":
+      return { label: "Hoàn tiền", tone: "violet" }
+    case "ADJUSTMENT":
+      return { label: "Điều chỉnh", tone: "neutral" }
+    default:
+      return { label: type, tone: "neutral" }
   }
 }

@@ -11,6 +11,7 @@ import {
   type CreateTopupRequestInput,
 } from "@/features/wallet/validations"
 import { getTopupPaymentPlan } from "@/features/payment/services/prepare-payment"
+import type { PaymentIntentStatus } from "@/features/payment/types"
 import {
   mapPaymentMethodCodeToPrisma,
   mapPaymentProviderCodeToPrisma,
@@ -36,7 +37,7 @@ export interface CreatedTopupRequest {
   currency: string
   paymentMethod: "bank_transfer" | "manual_confirmation"
   paymentProvider: "manual_bank_transfer" | "manual_review"
-  paymentStatus: "pending" | "succeeded" | "requires_action" | "failed"
+  paymentStatus: PaymentIntentStatus
   instructions: {
     title: string
     lines: string[]
