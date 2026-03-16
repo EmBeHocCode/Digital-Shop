@@ -8,6 +8,12 @@ Scope of this audit:
 - active app lives under [`app`](../app), [`components`](../components), [`features`](../features), [`lib`](../lib), [`prisma`](../prisma), [`store`](../store), [`types`](../types), and [`docs`](../docs)
 - [`bot-AI/apps`](../bot-AI/apps) is a separate AI bot workspace and is not treated as the main web app here
 
+Documentation authority note:
+
+- this file is the deepest current-state implementation audit
+- [`PROJECT_STATUS_OVERVIEW.md`](./PROJECT_STATUS_OVERVIEW.md) is the shorter snapshot
+- [`DATABASE_SCOPE_MAP.md`](./DATABASE_SCOPE_MAP.md) focuses on data-source/runtime/schema mapping rather than route truth
+
 Inspection method:
 
 - route tree inspection of the root App Router
@@ -18,7 +24,7 @@ Inspection method:
 
 ## 1. Executive Summary
 
-Digital-Shop is currently an advanced MVP / pre-production marketplace application. It is no longer just a marketing demo or UI prototype. The root web app already includes a public storefront, strong product configuration flows, authentication, account lifecycle pieces, real order creation, wallet and billing foundations, Stripe-based card payment integration, and a role-aware internal admin area.
+Digital-Shop is currently an advanced MVP / pre-production marketplace application. It is no longer just a marketing demo or UI prototype. The root web app already includes a public storefront, strong product configuration flows, authentication, account lifecycle pieces, real order creation, wallet and billing foundations, Stripe payment initiation with webhook synchronization, and a role-aware internal admin area.
 
 Current maturity level:
 
@@ -70,7 +76,7 @@ Biggest risks:
 
 | Route | Intended role | Status | Notes |
 | --- | --- | --- | --- |
-| `/dashboard` | management dashboard; customer redirect | Partial | Management users see overview; customers are redirected to profile. Semantics are mixed but controlled. |
+| `/dashboard` | management dashboard; customer redirect | Partial | Management users see overview; customers are redirected to profile. This works today but keeps customer and management semantics under the same prefix. |
 | `/dashboard/profile` | customer + management | Fully implemented | Best current default account home for all signed-in users. |
 | `/dashboard/orders` | customer + management | Fully implemented | Real order list with summary and detail links. |
 | `/dashboard/orders/[orderId]` | customer + management | Fully implemented | Strong order detail view with persisted configuration display. |

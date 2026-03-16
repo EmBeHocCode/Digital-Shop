@@ -9,6 +9,8 @@ Tài liệu này liệt kê toàn bộ dữ liệu đang xuất hiện trên web
 Important note:
 
 - file này tập trung vào bản đồ dữ liệu và nguồn dữ liệu
+- nó mô tả root web app và root schema làm nguồn trạng thái chính
+- [`bot-AI/apps`](../bot-AI/apps) là workspace bot riêng, không phải main web app được audit ở đây
 - nó không còn là tài liệu route/feature audit đầy đủ của root web app
 - các luồng runtime mới hơn như:
   - email verification
@@ -43,28 +45,28 @@ Hiện tại web dùng 3 nguồn dữ liệu chính:
 - dùng cho local fallback của order success page
 
 3. `PostgreSQL qua Prisma`
-- dùng cho user/auth foundation
+- dùng cho user/auth/account lifecycle
 - dùng cho product catalog khi `DATABASE_URL` có thật và DB chạy được
-- dùng cho order, wallet, transaction, billing, settings
+- dùng cho order, wallet, transaction, payment, billing, admin operations, settings
 
 ---
 
 ## Implemented Foundation Snapshot
 
-Tính đến `2026-03-14`, database foundation đã được mở rộng thêm cho:
+Tính đến `2026-03-16`, database foundation đã được mở rộng thêm cho:
 
 - marketing content / landing CMS foundation
 - product configuration và inventory foundation
 - persisted cart và account preferences
 - payment/refund/fulfillment foundation
-- bot AI hỗ trợ tồn kho, lợi nhuận và xu hướng thị trường
+- AI/BI foundation hỗ trợ tồn kho, lợi nhuận và xu hướng thị trường
 
 ### Schema groups đã có
 
 - `MarketingSection`, `MarketingFaq`, `Testimonial`, `PricingPlan`
 - `ProductOptionGroup`, `ProductOptionValue`, `ProductDenomination`, `ProductInventoryNumber`
 - `Cart`, `CartItem`
-- `UserPreference`, `SecurityEvent`, `PasswordResetToken`
+- `UserPreference`, `SecurityEvent`, `PasswordResetToken`, `EmailVerificationToken`
 - `PaymentIntent`, `PaymentWebhookEvent`, `RefundRequest`
 - `ServiceProvision`, `DigitalDelivery`
 - `InventoryBalance`, `InventoryMovement`
@@ -387,12 +389,23 @@ Khi register thành công:
 
 Đã có foundation thật.
 
+### Runtime status
+
+Hiện root web app đã dùng DB/schema này cho:
+
+- register + create wallet
+- credentials login gating theo:
+  - `emailVerified`
+  - `isActive`
+- email verification token flow
+- forgot/reset password token flow
+- security event recording cho verification/reset
+
 ### Missing DB-related pieces
 
-- chưa có `Account` / `Session` tables kiểu adapter-based Auth.js
-- chưa có `VerificationToken`
-- `PasswordResetToken` đã có trong schema nhưng chưa nối flow reset password
+- chưa có `Account` / `Session` tables kiểu adapter-based Auth.js adapter
 - chưa có trusted devices / MFA
+- chưa có device/session management runtime trong root app
 
 ---
 
@@ -506,6 +519,9 @@ Order reads:
 Routes / pages:
 - `/api/orders`
 - `/dashboard/orders`
+- `/dashboard/orders/[orderId]`
+- `/dashboard/admin/orders`
+- `/dashboard/admin/orders/[orderId]`
 - `/order/success`
 
 ### DB entities used
@@ -561,10 +577,9 @@ Fields hiện có:
 
 ### Missing DB-related pieces
 
-- chưa có order detail page riêng
-- chưa có invoice table
+- chưa có invoice table riêng
 - `ServiceProvision` và `DigitalDelivery` đã có trong schema nhưng chưa được nối vào runtime fulfillment thật
-- chưa có invoice/export flow
+- chưa có invoice/export flow hoàn chỉnh
 
 ---
 
@@ -630,6 +645,7 @@ Pages:
 
 - `/dashboard/billing`
 - `/dashboard/wallet`
+- `/dashboard/admin/wallet`
 - dashboard overview
 
 ### DB entity used
@@ -665,12 +681,21 @@ Fields hiện có:
 
 Đã vào DB.
 
+### Runtime status
+
+Hiện root web app đã có:
+
+- billing overview dùng dữ liệu payment/order/transaction thật
+- invoice-like history suy ra từ order đã thanh toán
+- Stripe payment webhook synchronization
+- `PaymentWebhookEvent` để lưu raw webhook payload/meta cho Stripe path hiện tại
+
 ### Missing DB-related pieces
 
-- chưa có invoice entity
+- chưa có invoice entity riêng
 - chưa có payout entity
-- chưa có provider callback log
 - chưa có settlement / reconciliation table
+- chưa có export/PDF invoice runtime
 
 ---
 
@@ -748,6 +773,15 @@ Fields đang dùng ở settings:
 ### Current DB status
 
 Đã vào DB cho profile cơ bản.
+
+### Runtime status
+
+Root web app hiện đã có:
+
+- profile/settings page
+- update `name` + `phone` qua API thật
+- profile/account overview đọc trực tiếp từ DB
+- billing/profile/account summary cards lấy từ dữ liệu thật
 
 ### Missing DB-related pieces
 
@@ -867,7 +901,11 @@ Chưa có:
 ### Current source
 
 - `payment method` và `provider` hiện là enum + helper trong feature payment
-- order và transaction đã có field để sẵn sàng cho Stripe / VNPay
+- order và transaction đã có field để hỗ trợ wallet/manual flows và Stripe path hiện tại
+- Stripe runtime hiện có:
+  - checkout session creation
+  - webhook synchronization
+  - cancel/failure handling
 
 ### DB readiness
 
@@ -886,13 +924,21 @@ Chưa có:
 - `PaymentWebhookEvent`
 - `RefundRequest`
 
-### Missing DB pieces if going live
+### Runtime status
 
-Nếu tích hợp gateway thật sau này, nên cân nhắc:
+Hiện root web app đã có payment provider integration ở mức runtime cho Stripe:
+
+- real payment initiation từ checkout
+- persisted `PaymentIntent`
+- persisted `PaymentWebhookEvent`
+- order/payment/transaction sync sau webhook
+
+### Missing DB pieces if going live sâu hơn
 
 - settlement / reconciliation tables
-- provider-specific raw event mapping
+- provider-specific raw event mapping cho nhiều provider hơn
 - retry / dead-letter handling cho webhook failures
+- invoice/export layer đầy đủ
 
 ---
 
@@ -900,20 +946,28 @@ Nếu tích hợp gateway thật sau này, nên cân nhắc:
 
 ### Current state
 
-Chưa có admin module thật.
+Root web app hiện đã có admin module thật trong App Router, gồm:
 
-Nhưng DB hiện đã đủ nền cơ bản để build:
+- `/dashboard/admin`
+- `/dashboard/admin/orders`
+- `/dashboard/admin/users`
+- `/dashboard/admin/wallet`
+- `/dashboard/admin/products`
+- `/dashboard/admin/sql-manager`
+
+Với product management hiện tại, DB đã được dùng cho:
 
 - list products
-- create/edit product
+- create/edit product cấp cao
 - publish/archive product
 - featured sort order
+- filter theo domain / status
 
 ### Existing DB table used
 
 `Product`
 
-### Missing if admin becomes real
+### Missing in current admin product/runtime depth
 
 - `ProductAuditLog`
 - `ProductCategory`
@@ -922,6 +976,7 @@ Nhưng DB hiện đã đủ nền cơ bản để build:
 - `DigitalStock`
 - `SimInventory`
 - `ProvisioningTemplate`
+- admin UI cho option groups / option values / denominations / inventory numbers
 
 ---
 

@@ -6,6 +6,12 @@ Authoritative deep audit:
 
 - [Current project audit](./CURRENT_PROJECT_AUDIT.md)
 
+Documentation note:
+
+- [CURRENT_PROJECT_AUDIT.md](./CURRENT_PROJECT_AUDIT.md) is the deepest current-state implementation audit
+- [DATABASE_SCOPE_MAP.md](./DATABASE_SCOPE_MAP.md) focuses on data-source, schema, and runtime-usage mapping
+- this file is the shorter high-level snapshot of the current root web app
+
 ## Current Snapshot
 
 Digital-Shop is now an advanced MVP / pre-production marketplace in the root web app. The project already has:
@@ -14,7 +20,7 @@ Digital-Shop is now an advanced MVP / pre-production marketplace in the root web
 - realistic product configurators for six product types
 - login/register, email verification, forgot/reset password
 - cart, checkout, orders, wallet, billing, profile, and settings
-- Stripe card-payment integration foundation with webhook sync
+- Stripe payment initiation and webhook synchronization
 - role-aware customer area and internal admin area
 - admin operations for orders, users, wallet, products, and SQL tooling
 - a deep Prisma/PostgreSQL schema prepared for fulfillment, analytics, and AI
@@ -36,6 +42,20 @@ Separate workspaces:
 - [bot-AI/apps](../bot-AI/apps)
 - [ai-service](../ai-service)
 
+## Current Role Model
+
+- `CUSTOMER`: storefront and customer-account usage
+- `STAFF`: limited internal operational access
+- `MANAGER`: broader operational and commercial access
+- `ADMIN`: full management access in the root web app
+- `SUPERADMIN`: highest internal role, currently close to admin for most active root-app operations
+
+Current compatibility note:
+
+- customer pages currently live under `/dashboard/*`
+- management/admin pages currently live under `/dashboard/admin/*`
+- this works and is actively used, but it is still a semantically mixed route model and remains a likely future cleanup target
+
 ## Current Route Groups
 
 ### Public
@@ -53,6 +73,7 @@ Separate workspaces:
 - `/cart`
 - `/checkout`
 - `/order/success`
+- `/payment/stripe/cancel`
 
 ### Customer / account
 
@@ -109,6 +130,12 @@ Current infrastructure notes:
 - Stripe env keys are expected for real card checkout
 - SMTP env config is expected for production email delivery
 - development mail falls back to preview logging when SMTP is not configured
+
+Payment wording note:
+
+- Stripe payment initiation and webhook synchronization are implemented
+- billing history exists
+- invoice export and fuller reconciliation workflows remain incomplete
 
 ## Important Architecture Notes
 

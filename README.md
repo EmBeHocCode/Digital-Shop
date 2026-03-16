@@ -48,7 +48,7 @@ Those workspaces are intentionally separate. The main shipping web application l
 
 - Prisma + PostgreSQL
 - NextAuth credentials auth
-- Stripe card-payment integration foundation with webhook handling
+- Stripe payment initiation and webhook synchronization
 - wallet/manual payment paths
 - fulfillment and digital-delivery schema foundation
 - analytics, inventory, market, and AI-ready data models
@@ -65,7 +65,7 @@ Those workspaces are intentionally separate. The main shipping web application l
 | Checkout and orders | Implemented with server-side price recalculation and persisted order item configuration |
 | Wallet | Implemented foundation with balances, transactions, and top-up request flow |
 | Billing | Implemented foundation with payment history and invoice-like records derived from paid orders |
-| Payment | Stripe card checkout plus webhook sync; wallet and manual transfer flows also exist |
+| Payment | Stripe payment initiation and webhook sync are implemented; wallet and manual transfer flows also exist |
 | Admin/operations | Implemented foundation for orders, users, wallet, products, and SQL manager |
 | Fulfillment | Schema foundation exists, runtime automation is still partial |
 | AI/data foundation | Strong schema/services foundation, but no root-app AI UI yet |
@@ -87,6 +87,7 @@ Those workspaces are intentionally separate. The main shipping web application l
 - `/cart`
 - `/checkout`
 - `/order/success`
+- `/payment/stripe/cancel`
 
 ### Authenticated customer/account routes
 
@@ -176,6 +177,13 @@ Key notes:
 - [`bot-AI/apps`](./bot-AI/apps) is a separate AI bot workspace
 - [`ai-service`](./ai-service) is separate service/infrastructure code
 
+## Documentation Map
+
+- [`README.md`](./README.md): public overview, repository boundary, setup, and honest current-state summary
+- [`docs/CURRENT_PROJECT_AUDIT.md`](./docs/CURRENT_PROJECT_AUDIT.md): deepest implementation audit and current-state source of truth
+- [`docs/PROJECT_STATUS_OVERVIEW.md`](./docs/PROJECT_STATUS_OVERVIEW.md): shorter snapshot of the current root web app
+- [`docs/DATABASE_SCOPE_MAP.md`](./docs/DATABASE_SCOPE_MAP.md): data-source, schema, and runtime-usage map
+
 ## Tech Stack
 
 ### Frontend
@@ -209,6 +217,22 @@ Key notes:
 - TypeScript typecheck
 - Prisma seed/generate/db push scripts
 - Docker Compose for local Postgres
+
+## Role Model
+
+The current root web app supports these practical roles:
+
+- `CUSTOMER`: storefront and customer account usage
+- `STAFF`: limited internal operational access
+- `MANAGER`: broader internal operational and commercial access
+- `ADMIN`: full management access in the root app
+- `SUPERADMIN`: highest internal role, currently treated close to admin for most root-app operations
+
+Current compatibility note:
+
+- customer pages still live under `/dashboard/*`
+- management/admin pages live under `/dashboard/admin/*`
+- this works today, but it is still a semantically mixed route model and remains a likely future cleanup target
 
 ## Setup and Run
 
@@ -295,6 +319,12 @@ The biggest current gaps are:
 - there is no dedicated admin billing/reconciliation page yet
 - the root app has AI-ready data/services, but no end-user AI assistant UI yet
 - legacy code still exists under [`src`](./src) and can confuse maintenance if not clearly treated as inactive
+
+Payment state clarification:
+
+- Stripe payment initiation and webhook synchronization are implemented
+- billing history is present
+- invoice export, reconciliation, and fuller finance operations are still incomplete
 
 ## Recommended Next Steps
 
