@@ -1,6 +1,6 @@
 # Project Status Overview
 
-Last updated: 2026-03-15
+Last updated: 2026-03-16
 
 ## Summary
 
@@ -9,10 +9,12 @@ Digital-Shop hiện là một dự án `Next.js App Router` với:
 - public landing page
 - public services catalog
 - auth foundation + auth UI
+- role-aware auth redirect và public navigation
 - product configurator UI theo từng loại dịch vụ
 - cart / checkout / order flow thật
 - wallet + billing foundation đã có UI dashboard
 - dashboard shell đã có bảo vệ session
+- admin SQL manager foundation
 - backend foundation với Prisma + PostgreSQL + Auth.js
 
 Chiến lược triển khai đến hiện tại là refactor tăng dần theo phase, không rewrite toàn bộ app.
@@ -94,11 +96,30 @@ Chiến lược triển khai đến hiện tại là refactor tăng dần theo p
   - xóa `postcss.config.js` cũ
   - đổi `middleware.ts` sang `proxy.ts` theo Next 16 convention
 
+### Phase 9
+
+- thêm role-aware redirect sau đăng nhập / đăng ký:
+  - tài khoản quản lý mặc định về `/dashboard`
+  - tài khoản thường mặc định về `/`
+- public header chỉ hiển thị shortcut `Dashboard` cho tài khoản có quyền quản lý
+- thêm page:
+  - `/access-denied`
+- tinh chỉnh CTA public:
+  - hero CTA đổi theo role/session
+  - tắt prefetch cho các link `/services` ở public shell để tránh cảm giác load lặp trong dev
+- hoàn thiện admin database tooling foundation:
+  - `/dashboard/admin/sql-manager`
+  - `/api/admin/database/tables`
+  - `/api/admin/database/columns`
+  - `/api/admin/database/rows`
+  - `/api/admin/database/query`
+
 ## Current website map
 
 ### Public pages
 
 - `/`
+- `/access-denied`
 - `/services`
 - `/services/vps`
 - `/services/cloud-server`
@@ -123,6 +144,7 @@ Chiến lược triển khai đến hiện tại là refactor tăng dần theo p
 - `/dashboard/purchased-products/[productId]`
 - `/dashboard/billing`
 - `/dashboard/settings`
+- `/dashboard/admin/sql-manager`
 
 ### API routes
 
@@ -132,6 +154,10 @@ Chiến lược triển khai đến hiện tại là refactor tăng dần theo p
 - `/api/wallet`
 - `/api/wallet/topups`
 - `/api/account/settings`
+- `/api/admin/database/tables`
+- `/api/admin/database/columns`
+- `/api/admin/database/rows`
+- `/api/admin/database/query`
 
 ## Current repo shape
 
@@ -147,12 +173,15 @@ components/
   ui/
 features/
   account/
+  admin/
+  ai/
   auth/
   cart/
   catalog/
   dashboard/
   landing/
   orders/
+  payment/
   wallet/
 lib/
   auth/
@@ -171,7 +200,9 @@ agents/
 ### Home page `/`
 
 - public header
+- role-aware dashboard shortcut
 - hero section
+- role-aware CTA block
 - logo cloud
 - services section
 - features section
@@ -188,6 +219,7 @@ agents/
 - product/service cards
 - links sang từng trang chi tiết
 - safe fallback UI nếu database chưa có product active
+- public navigation đã tắt prefetch cho `/services` trong shell chính để tránh load vòng lặp ở dev
 
 ### Service detail pages `/services/[slug]`
 
@@ -222,7 +254,8 @@ Mỗi page hiện có:
 
 - login form dùng React Hook Form + Zod
 - credentials auth qua Auth.js
-- redirect theo `callbackUrl`
+- anti-bot check
+- redirect theo `callbackUrl` + role hiện tại
 
 #### `/register`
 
@@ -232,6 +265,7 @@ Mỗi page hiện có:
 - chặn email trùng
 - tạo `User`
 - tạo `Wallet`
+- sau đăng ký, tài khoản thường quay về trang chủ thay vì mặc định vào dashboard
 
 ### Cart + checkout flow
 
@@ -267,6 +301,7 @@ Mỗi page hiện có:
 - dashboard shell
 - protected by session
 - redirect to `/login` nếu chưa đăng nhập
+- role gating theo chính sách dashboard hiện tại
 - sidebar
 - dashboard header
 - analytics cards
@@ -274,6 +309,12 @@ Mỗi page hiện có:
 - weekly activity chart
 - recent activity
 - quick links sang billing và purchased products
+
+#### `/access-denied`
+
+- access denied state cho các route bị chặn theo role/policy
+- CTA quay về trang chủ
+- CTA quay lại trang trước
 
 ### Dashboard account pages
 
@@ -349,6 +390,13 @@ Mỗi page hiện có:
 - user preferences card
 - account activity summary
 - embedded profile editing form
+
+#### `/dashboard/admin/sql-manager`
+
+- database manager UI cho admin
+- xem tables / columns / rows
+- query database trực tiếp qua admin APIs
+- phục vụ debugging / data inspection nội bộ
 
 ## Completed phases
 
@@ -801,6 +849,58 @@ Outcome:
 - order và purchased product flows đã có trang detail thực tế
 - repo hiện pass `lint`, `tsc`, `build` sau khi dọn legacy config gây nhiễu
 
+### Phase 9: Role-based access polish + admin DB tooling foundation
+
+Goal:
+
+- làm luồng đăng nhập và CTA public bám sát role thực tế hơn
+- tránh việc user thường bị đẩy vào dashboard không phù hợp
+- thêm access denied state rõ ràng
+- mở admin database tooling theo kiến trúc dashboard hiện có mà không rewrite shell
+
+What was done:
+
+- thêm helper role cho:
+  - default signed-in path
+  - redirect normalization
+  - role-aware post-auth path resolution
+- cập nhật login/register flow để redirect theo role và `callbackUrl`
+- thêm anti-bot check ở login page
+- public header chỉ hiện `Dashboard` cho tài khoản có quyền quản lý
+- hero CTA ở landing đổi theo role/session:
+  - management -> `/dashboard`
+  - authenticated regular user -> `/services`
+  - anonymous user -> `/register`
+- thêm `/access-denied`
+- tắt prefetch cho các link `/services` trong public shell chính để tránh load vòng lặp trong dev
+- hoàn thiện admin SQL manager:
+  - page trong dashboard
+  - admin database APIs cho tables / columns / rows / query
+
+Pages/routes added in Phase 9:
+
+- `/access-denied`
+- `/dashboard/admin/sql-manager`
+- `/api/admin/database/tables`
+- `/api/admin/database/columns`
+- `/api/admin/database/rows`
+- `/api/admin/database/query`
+
+Main features delivered:
+
+- role-aware post-auth experience
+- dashboard shortcut không còn hiển thị cho tài khoản thường ở public header
+- access denied state rõ ràng cho route bị chặn
+- public CTA / services navigation mượt hơn trong local dev
+- admin database tooling foundation trong dashboard
+
+Outcome:
+
+- tài khoản thường không còn mặc định bị đưa vào dashboard sau khi đăng nhập/đăng ký
+- public shell phản ánh quyền truy cập rõ ràng hơn
+- dashboard đã có thêm một khối admin tooling nội bộ để inspect dữ liệu
+- local dev UX bớt cảm giác "bị load mãi" khi đi vào `/services`
+
 ## Phase summary
 
 - Phase 1: refactor vừa đủ + public services catalog
@@ -811,6 +911,7 @@ Outcome:
 - Phase 6: product configurator + purchased products / billing / settings UI
 - Phase 7: AI-ready data foundation + commerce schema expansion
 - Phase 8: dashboard profile + detail pages + quality gate cleanup
+- Phase 9: role-based auth/dashboard polish + access-denied + admin DB tooling foundation
 
 ## Current technical status
 
@@ -821,7 +922,11 @@ Outcome:
 - public site vẫn hoạt động
 - auth pages đã hoạt động
 - dashboard đã được bảo vệ bằng session
+- login/register hiện redirect theo role và callback path
+- public header hiện ẩn shortcut `Dashboard` với tài khoản thường
 - dashboard hiện có profile page và detail pages cho orders / purchased products
+- access denied page đã có
+- admin SQL manager route và admin database APIs đã có
 - services catalog vẫn hoạt động
 - catalog có fallback an toàn nếu DB chưa sẵn sàng
 - seed command đã có nhưng chưa bắt buộc phải chạy để UI hoạt động
@@ -833,22 +938,25 @@ Outcome:
 - chạy seed vào database thật
 - persist product configuration vào bảng/query layer riêng nếu muốn analytics sâu hơn ngoài `OrderItem.metadata`
 - wallet top-up settlement thật
-- admin/product management
+- full admin/product management ngoài SQL manager foundation
 - payment integration thật
 - invoice/export flow
 - password change / advanced security UI
 - AI chat UI / AI API route
 - scheduled jobs để cập nhật market / forecast data tự động
+- unify role matrix đầy đủ cho toàn bộ `CUSTOMER / STAFF / MANAGER / ADMIN / SUPERADMIN` nếu dashboard mở rộng thêm use case quản trị
 
 ## Recommended next phases
 
-### Phase 9
+### Phase 10
 
+- unify role matrix giữa customer dashboard và management dashboard
+- tách riêng rõ user dashboard và management/admin workspace nếu cần
 - apply schema mới vào PostgreSQL thật
 - seed database thật bằng `db:seed`
 - nối dần landing/product/cart runtime sang service layer mới
 - thêm AI chat/API dùng `getBusinessIntelligenceContext`
-- thêm admin/product management có role gating
+- mở rộng admin/product management có role gating
 - invoice history / export
 - payment provider thật như Stripe hoặc VNPay
 
@@ -857,3 +965,4 @@ Outcome:
 - Tất cả refactor đến hiện tại đều theo hướng incremental, không rewrite toàn bộ.
 - Các module mới chỉ được tạo khi đã có use case thật, tránh over-engineering.
 - UI public hiện tại được giữ ổn định trong suốt các phase vừa triển khai.
+- Role matrix hiện đã có foundation helper, nhưng nếu mở thêm workspace quản trị cho `STAFF/MANAGER` thì nên consolidate policy ở một phase riêng.

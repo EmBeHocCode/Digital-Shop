@@ -14,12 +14,14 @@ Main app hiện đã có:
 
 - public landing page
 - public services catalog
+- role-aware auth redirect và public navigation
 - service detail pages với configurator theo từng loại sản phẩm
 - login / register
 - anti-bot check ở login
 - protected dashboard
 - cart / checkout / order success flow
 - order + wallet foundation có API thật
+- admin SQL manager foundation
 - Prisma + PostgreSQL + Auth.js foundation
 - schema và service foundation mở rộng cho inventory / profitability / market intelligence / AI
 
@@ -39,6 +41,7 @@ Lưu ý:
 ### Public routes
 
 - `/`
+- `/access-denied`
 - `/services`
 - `/services/vps`
 - `/services/cloud-server`
@@ -55,11 +58,15 @@ Lưu ý:
 ### Protected routes
 
 - `/dashboard`
+- `/dashboard/profile`
 - `/dashboard/orders`
+- `/dashboard/orders/[orderId]`
 - `/dashboard/wallet`
 - `/dashboard/purchased-products`
+- `/dashboard/purchased-products/[productId]`
 - `/dashboard/billing`
 - `/dashboard/settings`
+- `/dashboard/admin/sql-manager`
 
 ### API routes
 
@@ -69,15 +76,21 @@ Lưu ý:
 - `/api/wallet`
 - `/api/wallet/topups`
 - `/api/account/settings`
+- `/api/admin/database/tables`
+- `/api/admin/database/columns`
+- `/api/admin/database/rows`
+- `/api/admin/database/query`
 
 ## Tính năng đã có
 
 ### 1. Public landing + catalog
 
 - landing page với hero, services, features, pricing, benefits, testimonials, FAQ
+- CTA public đổi theo role/session hiện tại
 - catalog công khai cho 6 nhóm dịch vụ
 - service detail pages thật, không còn chỉ là section trên landing
 - routing public đã nối đồng bộ giữa header, CTA, catalog và dashboard
+- navigation public đã được chỉnh để tránh load lặp khó chịu ở `/services` khi dev local
 
 ### 2. Product configurator
 
@@ -105,8 +118,13 @@ Các product pages hiện có:
 - password hashing
 - duplicate email validation
 - auto-create wallet khi đăng ký
+- redirect sau login/register theo role và `callbackUrl`
+- tài khoản thường không còn mặc định bị đẩy vào dashboard
+- shortcut `Dashboard` ở public header chỉ hiện cho tài khoản có quyền quản lý
 - dashboard bảo vệ bằng session
 - login anti-bot challenge
+- access denied state cho route bị chặn theo role
+- profile page riêng trong dashboard
 - settings page cập nhật profile thật
 
 ### 4. Cart / checkout / orders
@@ -118,6 +136,7 @@ Các product pages hiện có:
 - server-side recalculation giá
 - order success page
 - config mua hàng đã persist vào `OrderItem`
+- order detail page cho từng đơn trong dashboard
 
 ### 5. Wallet / billing / purchased products
 
@@ -127,8 +146,17 @@ Các product pages hiện có:
 - billing overview
 - purchased products page
 - dashboard orders page
+- purchased product detail page
+- profile / billing / settings pages đã nối đồng bộ trong dashboard
 
-### 6. Data + AI foundation
+### 6. Admin / internal tooling
+
+- admin SQL manager trong dashboard
+- API đọc tables / columns / rows
+- API query database nội bộ
+- phục vụ inspect dữ liệu và debug trong môi trường nội bộ
+
+### 7. Data + AI foundation
 
 Schema hiện đã mở rộng cho:
 
@@ -275,6 +303,26 @@ Nguyên tắc tổ chức hiện tại:
 - thêm service entry points cho marketing, commerce context, cart, preferences, business intelligence
 - giữ fallback an toàn để web không bị buộc database-first quá sớm
 
+### Phase 8 - Dashboard detail pages + repo quality gate cleanup
+
+- thêm `/dashboard/profile`
+- thêm `/dashboard/orders/[orderId]`
+- thêm `/dashboard/purchased-products/[productId]`
+- thêm reusable detail UI cho dashboard
+- đọc lại persisted config từ `OrderItem.metadata`
+- dọn repo config để `lint`, `tsc`, `build` phản ánh đúng app đang ship
+
+### Phase 9 - Role-based access polish + admin DB tooling foundation
+
+- redirect sau login/register theo role:
+  - tài khoản quản lý -> `/dashboard`
+  - tài khoản thường -> `/`
+- public header chỉ hiện `Dashboard` cho tài khoản có quyền quản lý
+- thêm `/access-denied`
+- hero CTA đổi theo role/session
+- hoàn thiện `/dashboard/admin/sql-manager`
+- thêm admin database APIs cho tables / columns / rows / query
+
 ## Dữ liệu hiện đang nằm ở đâu
 
 Hiện web đang dùng 3 nguồn dữ liệu chính:
@@ -358,10 +406,13 @@ corepack pnpm run db:studio
 
 Các hướng phát triển tiếp theo đã được chuẩn bị nền:
 
-- admin / product management
+- full admin / product management ngoài SQL manager foundation
 - inventory optimization
 - profitability analytics
 - market trend forecasting
 - AI assistant / AI bot tích hợp trực tiếp vào web
+- payment provider thật
+- invoice / export flow
+- tách rõ hơn customer dashboard và management workspace nếu cần
 
 Mục tiêu dài hạn của repo không còn là demo UI, mà là một nền tảng digital commerce có dữ liệu thật và sẵn sàng cho automation + AI.
