@@ -4,9 +4,11 @@ import type {
   PaymentIntentStatus,
   PaymentMethodCode,
   PaymentProviderCode,
+  TopupChannelCode,
   TopupPaymentMethodCode,
 } from "@/features/payment/types"
 import { getPaymentInstructions } from "@/features/payment/utils"
+import { getTopupChannelInstructions } from "@/features/payment/services/sepay-topup"
 
 export interface OrderPaymentPlan {
   method: PaymentMethodCode
@@ -20,6 +22,7 @@ export interface OrderPaymentPlan {
 
 export interface TopupPaymentPlan {
   method: TopupPaymentMethodCode
+  channel: TopupChannelCode
   provider: "manual_bank_transfer" | "manual_review"
   paymentStatus: PaymentIntentStatus
   transactionStatus: TransactionStatus
@@ -79,20 +82,23 @@ export function getOrderPaymentPlan(
 
 export function getTopupPaymentPlan(
   method: TopupPaymentMethodCode,
-  reference?: string | null
+  reference?: string | null,
+  channel: TopupChannelCode = "manual_bank_transfer"
 ): TopupPaymentPlan {
   if (method === "bank_transfer") {
     return {
       method,
+      channel,
       provider: "manual_bank_transfer",
       paymentStatus: "pending",
       transactionStatus: TransactionStatus.PENDING,
-      instructions: getPaymentInstructions(method, "manual_bank_transfer", "pending", reference),
+      instructions: getTopupChannelInstructions(channel, reference),
     }
   }
 
   return {
     method,
+    channel: "manual_bank_transfer",
     provider: "manual_review",
     paymentStatus: "pending",
     transactionStatus: TransactionStatus.PENDING,

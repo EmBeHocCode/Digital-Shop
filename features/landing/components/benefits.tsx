@@ -1,4 +1,6 @@
-import { ServerCrash, MapPin, LayoutDashboard, Headphones } from "lucide-react"
+import { Headphones, LayoutDashboard, MapPin, ServerCrash } from "lucide-react"
+import { PremiumCard } from "@/features/dashboard/components/premium-card"
+import { SectionShell } from "@/features/landing/components/section-shell"
 
 const benefits = [
   {
@@ -12,59 +14,56 @@ const benefits = [
     icon: MapPin,
     title: "Nhiều vị trí máy chủ",
     description:
-      "Lựa chọn vị trí đặt máy chủ tại Việt Nam (HN, HCM), Singapore, Nhật Bản và Mỹ — tối ưu độ trễ cho người dùng toàn cầu.",
+      "Lựa chọn vị trí đặt máy chủ tại Việt Nam, Singapore, Nhật Bản và Mỹ để tối ưu độ trễ cho nhiều nhóm khách hàng khác nhau.",
     highlight: "6 Data Centers",
   },
   {
     icon: LayoutDashboard,
-    title: "Dashboard thống nhất",
+    title: "Workspace thống nhất",
     description:
-      "Quản lý toàn bộ dịch vụ — VPS, game card, SIM, giftcard — trong một giao diện dashboard trực quan, dễ dùng trên cả web và mobile.",
+      "Quản lý toàn bộ dịch vụ — VPS, game card, SIM, giftcard — trong một giao diện có nhịp vận hành đồng bộ giữa account và admin.",
     highlight: "All-in-one Panel",
   },
   {
     icon: Headphones,
     title: "Hỗ trợ 24/7",
     description:
-      "Đội ngũ kỹ thuật sẵn sàng 24 giờ mỗi ngày, 7 ngày một tuần. Phản hồi qua live chat, Zalo, Telegram trong vòng 5 phút.",
+      "Đội ngũ kỹ thuật sẵn sàng 24 giờ mỗi ngày, 7 ngày một tuần với các kênh phản hồi phù hợp cho cả cá nhân và doanh nghiệp.",
     highlight: "< 5 min response",
   },
 ]
 
 export function Benefits() {
   return (
-    <section className="py-24 lg:py-32 border-t border-border">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center mb-16">
-          <p className="text-sm font-medium text-muted-foreground mb-3">Lợi ích nền tảng</p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">
-            Cơ sở hạ tầng đáng tin cậy
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground text-pretty">
-            Hệ thống được thiết kế để hoạt động liên tục, ổn định và bảo mật ở mọi quy mô.
-          </p>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {benefits.map((b) => (
-            <div
-              key={b.title}
-              className="rounded-xl border border-border bg-card p-6 flex flex-col gap-4"
-            >
-              <div className="flex size-10 items-center justify-center rounded-lg border border-border bg-muted">
-                <b.icon className="size-5 text-foreground" />
-              </div>
-              <div>
-                <div className="inline-block rounded-md bg-muted px-2 py-0.5 text-xs font-mono text-muted-foreground mb-3">
-                  {b.highlight}
-                </div>
-                <h3 className="text-sm font-semibold">{b.title}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{b.description}</p>
-              </div>
+    <SectionShell
+      description="Hạ tầng bên dưới được thiết kế để giữ trải nghiệm storefront mượt, đồng thời phục vụ các luồng vận hành và hỗ trợ sau bán."
+      eyebrow="Platform benefits"
+      title="Cơ sở hạ tầng đáng tin cậy"
+      tone="blue"
+    >
+      <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-4">
+        {benefits.map((benefit, index) => (
+          <PremiumCard
+            key={benefit.title}
+            className="flex h-full flex-col gap-5 p-6"
+            interactive
+            variant={index === 0 || index === 2 ? "hero" : "default"}
+          >
+            <div className="flex size-12 items-center justify-center rounded-2xl border border-sky-500/15 bg-sky-500/8 text-sky-600 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] dark:text-sky-300">
+              <benefit.icon className="size-5" />
             </div>
-          ))}
-        </div>
+            <div>
+              <span className="premium-chip px-3 py-1 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                {benefit.highlight}
+              </span>
+              <h3 className="mt-4 text-lg font-semibold tracking-tight text-foreground">
+                {benefit.title}
+              </h3>
+              <p className="mt-3 text-sm leading-7 text-muted-foreground">{benefit.description}</p>
+            </div>
+          </PremiumCard>
+        ))}
       </div>
-    </section>
+    </SectionShell>
   )
 }

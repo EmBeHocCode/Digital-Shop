@@ -10,6 +10,11 @@ export const topupPaymentMethodCodes = [
   "manual_confirmation",
 ] as const
 
+export const topupChannelCodes = [
+  "manual_bank_transfer",
+  "sepay_qr",
+] as const
+
 export const paymentProviderCodes = [
   "internal_wallet",
   "manual_bank_transfer",
@@ -28,6 +33,7 @@ export const paymentIntentStatuses = [
 
 export type PaymentMethodCode = (typeof paymentMethodCodes)[number]
 export type TopupPaymentMethodCode = (typeof topupPaymentMethodCodes)[number]
+export type TopupChannelCode = (typeof topupChannelCodes)[number]
 export type PaymentProviderCode = (typeof paymentProviderCodes)[number]
 export type PaymentIntentStatus = (typeof paymentIntentStatuses)[number]
 
@@ -46,4 +52,11 @@ export interface TopupPaymentOption {
   value: TopupPaymentMethodCode
   title: string
   description: string
+}
+
+export interface TopupChannelOption {
+  value: TopupChannelCode
+  title: string
+  description: string
+  badge?: string
 }

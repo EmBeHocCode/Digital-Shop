@@ -5,12 +5,11 @@ import {
   Phone,
   ReceiptText,
   ShieldCheck,
+  Sparkles,
   UserRound,
   Wallet2,
 } from "lucide-react"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Empty,
   EmptyContent,
@@ -20,11 +19,14 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty"
 import { SettingsForm } from "@/features/account/components/settings-form"
+import { ProfileAvatarUploader } from "@/features/account/components/profile-avatar-uploader"
 import { getBillingOverview } from "@/features/account/services/get-billing-overview"
 import { getUserPreferences } from "@/features/account/services/get-user-preferences"
 import { getUserSettings } from "@/features/account/services/get-user-settings"
 import { DetailMetadataCard } from "@/features/dashboard/components/detail-metadata-card"
 import { DetailStatusBadge } from "@/features/dashboard/components/detail-status-badge"
+import { InfoPanel } from "@/features/dashboard/components/info-panel"
+import { ProfileHero } from "@/features/dashboard/components/profile-hero"
 import {
   getAccountStatePresentation,
   getUserRolePresentation,
@@ -71,78 +73,77 @@ export default async function DashboardProfilePage() {
   }
 
   const userName = profile.name || "NexCloud User"
-  const userInitials = userName
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((value) => value[0]?.toUpperCase())
-    .join("")
   const latestOrder = recentOrders[0] ?? null
   const role = getUserRolePresentation(profile.role)
   const accountState = getAccountStatePresentation(profile.isActive)
 
   return (
     <div className="grid gap-6">
-      <Card className="border-border/80 bg-card/95 shadow-[0_28px_70px_-48px_rgba(14,165,233,0.35)]">
-        <CardHeader className="gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-4">
-            <Avatar className="size-16 rounded-2xl border border-border/70">
-              <AvatarImage src={profile.image ?? "/placeholder-user.jpg"} alt={userName} />
-              <AvatarFallback className="rounded-2xl bg-foreground/10 text-lg font-semibold text-foreground">
-                {userInitials || "NU"}
-              </AvatarFallback>
-            </Avatar>
-            <div className="space-y-3">
-              <div className="space-y-1">
-                <CardDescription>Profile hub</CardDescription>
-                <CardTitle className="text-3xl">{userName}</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Hồ sơ dùng chung cho checkout, billing, đơn hàng và các khu vực tài khoản đã bảo vệ.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <DetailStatusBadge label={role.label} tone={role.tone} />
-                <DetailStatusBadge label={accountState.label} tone={accountState.tone} />
-              </div>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <Button asChild>
+      <ProfileHero
+        actions={
+          <>
+            <Button
+              asChild
+              className="border border-sky-500/20 bg-foreground text-background shadow-[0_18px_36px_-24px_rgba(56,189,248,0.48)] transition-all hover:-translate-y-0.5 hover:border-sky-400/30 hover:bg-foreground/92 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/92"
+            >
               <Link href="/dashboard/orders">Đơn hàng</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild className="hover:border-cyan-400/30 hover:bg-cyan-500/8" variant="outline">
               <Link href="/dashboard/wallet">Ví & giao dịch</Link>
             </Button>
-            <Button asChild variant="outline">
+            <Button asChild className="hover:border-violet-400/30 hover:bg-violet-500/8" variant="outline">
               <Link href="/dashboard/settings">Settings</Link>
             </Button>
-          </div>
-        </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Số dư ví</p>
-            <p className="mt-2 text-2xl font-semibold">{walletSummary.balanceLabel}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{walletSummary.transactionCount} giao dịch ví.</p>
-          </div>
-          <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Tổng chi tiêu</p>
-            <p className="mt-2 text-2xl font-semibold">{billingOverview.totalSpentLabel}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{billingOverview.successfulPayments} thanh toán hoàn tất.</p>
-          </div>
-          <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Đơn hàng gần đây</p>
-            <p className="mt-2 text-2xl font-semibold">{recentOrders.length}</p>
-            <p className="mt-2 text-sm text-muted-foreground">
-              {latestOrder ? `Mới nhất ${formatDateTime(latestOrder.createdAt)}` : "Chưa có đơn hàng."}
-            </p>
-          </div>
-          <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">Billing pending</p>
-            <p className="mt-2 text-2xl font-semibold">{billingOverview.pendingTransactions}</p>
-            <p className="mt-2 text-sm text-muted-foreground">Các mục đang chờ xác minh hoặc xử lý tiếp.</p>
-          </div>
-        </CardContent>
-      </Card>
+          </>
+        }
+        avatar={<ProfileAvatarUploader email={profile.email} image={profile.image} name={userName} />}
+        badges={
+          <>
+            <DetailStatusBadge label={role.label} tone={role.tone} />
+            <DetailStatusBadge label={accountState.label} tone={accountState.tone} />
+          </>
+        }
+        description="Hồ sơ dùng chung cho checkout, billing, đơn hàng và các khu vực tài khoản đã bảo vệ. Đây là điểm trung tâm để quản lý danh tính, thông tin liên hệ và nhịp hoạt động của tài khoản."
+        identityMeta={
+          <>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-foreground/90">
+              <Mail className="size-3.5 text-sky-300" />
+              {profile.email}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-foreground/90">
+              <Sparkles className="size-3.5 text-cyan-300" />
+              Hồ sơ đang đồng bộ với checkout và billing
+            </span>
+          </>
+        }
+        metrics={[
+          {
+            icon: Wallet2,
+            label: "Số dư ví",
+            value: walletSummary.balanceLabel,
+            description: `${walletSummary.transactionCount} giao dịch ví.`,
+          },
+          {
+            icon: ReceiptText,
+            label: "Tổng chi tiêu",
+            value: billingOverview.totalSpentLabel,
+            description: `${billingOverview.successfulPayments} thanh toán hoàn tất.`,
+          },
+          {
+            icon: CalendarDays,
+            label: "Đơn hàng gần đây",
+            value: recentOrders.length,
+            description: latestOrder ? `Mới nhất ${formatDateTime(latestOrder.createdAt)}` : "Chưa có đơn hàng.",
+          },
+          {
+            icon: ShieldCheck,
+            label: "Billing pending",
+            value: billingOverview.pendingTransactions,
+            description: "Các mục đang chờ xác minh hoặc xử lý tiếp.",
+          },
+        ]}
+        title={userName}
+      />
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(320px,0.95fr)]">
         <SettingsForm profile={profile} />
@@ -217,26 +218,21 @@ export default async function DashboardProfilePage() {
             ]}
           />
 
-          <Card className="border-border/80 bg-card/95">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldCheck className="size-4 text-foreground" />
-                Account activity
-              </CardTitle>
-              <CardDescription>
-                Tóm tắt nhanh các khu vực user-facing nên theo dõi thường xuyên.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm text-muted-foreground">
-              <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+          <InfoPanel
+            description="Theo dõi nhanh các tín hiệu bảo mật, đơn hàng mới nhất và các khu vực nên mở thường xuyên."
+            eyebrow="Activity lane"
+            title="Account activity"
+          >
+            <div className="space-y-4 text-sm text-muted-foreground">
+              <div className="premium-data-item p-4">
                 <p className="font-medium text-foreground">Trạng thái bảo mật</p>
                 <p className="mt-2">
                   {profile.emailVerifiedAt
                     ? `Email đã xác minh vào ${formatDateTime(profile.emailVerifiedAt)}.`
-                    : "Chưa có flow email verification tự động ở phase hiện tại."}
+                    : "Email chưa được xác minh. Hãy kiểm tra hộp thư hoặc dùng trang xác minh để hoàn tất bảo mật tài khoản."}
                 </p>
               </div>
-              <div className="rounded-2xl border border-border/70 bg-muted/20 p-4">
+              <div className="premium-data-item p-4">
                 <p className="font-medium text-foreground">Đơn hàng gần nhất</p>
                 <p className="mt-2">
                   {latestOrder
@@ -245,21 +241,21 @@ export default async function DashboardProfilePage() {
                 </p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <Button asChild variant="outline">
+                <Button asChild className="hover:border-sky-400/30 hover:bg-sky-500/8" variant="outline">
                   <Link href="/dashboard/orders">
                     <ReceiptText className="size-4" />
                     Mở orders
                   </Link>
                 </Button>
-                <Button asChild variant="outline">
+                <Button asChild className="hover:border-cyan-400/30 hover:bg-cyan-500/8" variant="outline">
                   <Link href="/dashboard/wallet">
                     <Wallet2 className="size-4" />
                     Mở wallet
                   </Link>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </InfoPanel>
         </div>
       </div>
     </div>

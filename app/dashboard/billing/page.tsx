@@ -15,6 +15,7 @@ import { formatDateTime } from "@/lib/utils"
 import { getBillingOverview } from "@/features/account/services/get-billing-overview"
 import { getBillingInvoices } from "@/features/account/services/get-billing-invoices"
 import { getPaymentStatusClassName, getPaymentStatusLabel } from "@/features/payment/utils"
+import { TopupRequestForm } from "@/features/wallet/components/topup-request-form"
 import { getTransactionHistory } from "@/features/wallet/services/get-transaction-history"
 import { getWalletSummary } from "@/features/wallet/services/get-wallet-summary"
 
@@ -118,6 +119,11 @@ export default async function DashboardBillingPage() {
         </Card>
 
         <div className="grid gap-6">
+          <TopupRequestForm
+            description="Tạo yêu cầu nạp số dư ngay trong billing. Kênh SePay QR đã có sẵn foundation để sau này nối callback và đối soát tự động."
+            title="Nạp số dư ví"
+          />
+
           <Card className="border-border/80 bg-card/95">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -142,9 +148,9 @@ export default async function DashboardBillingPage() {
                 </p>
               </div>
               <div className="rounded-2xl border border-dashed border-border/70 p-4">
-                <p className="font-medium">Bank transfer / Provider ngoài</p>
+                <p className="font-medium">Bank transfer / SePay foundation</p>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Đơn sẽ giữ ở trạng thái pending để chờ xác minh hoặc callback provider ở phase sau.
+                  Billing hiện đã có chỗ tạo top-up theo kênh chuyển khoản thường hoặc SePay QR. Callback/webhook SePay vẫn chưa bật, nên transaction tiếp tục giữ ở trạng thái pending để chờ đối soát.
                 </p>
               </div>
             </CardContent>
@@ -204,6 +210,9 @@ export default async function DashboardBillingPage() {
               <Button asChild variant="outline">
                 <Link href="/checkout">Tạo đơn hàng mới</Link>
               </Button>
+              <p className="text-xs leading-6 text-muted-foreground">
+                Billing và Wallet hiện dùng chung transaction foundation để sau này gắn thêm SePay reconciliation mà không đổi flow người dùng.
+              </p>
             </CardContent>
           </Card>
         </div>

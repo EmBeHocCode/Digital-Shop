@@ -6,65 +6,75 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { PremiumCard } from "@/features/dashboard/components/premium-card"
+import { SectionShell } from "@/features/landing/components/section-shell"
 
 const faqs = [
   {
     question: "Sau khi thanh toán, bao lâu tôi nhận được dịch vụ?",
-    answer: "Hầu hết dịch vụ như thẻ game, giftcard, nạp điện thoại được giao tức thì ngay sau khi thanh toán thành công. VPS và Cloud Server thường khởi tạo trong vòng 30–60 giây. SIM số đẹp giao hàng toàn quốc trong 1–3 ngày làm việc.",
+    answer:
+      "Hầu hết dịch vụ như thẻ game, giftcard, nạp điện thoại được giao tức thì ngay sau khi thanh toán thành công. VPS và Cloud Server thường khởi tạo trong vòng 30–60 giây. SIM số đẹp giao hàng toàn quốc trong 1–3 ngày làm việc.",
   },
   {
     question: "NexCloud hỗ trợ những phương thức thanh toán nào?",
-    answer: "Chúng tôi hỗ trợ chuyển khoản ngân hàng (VietQR), ví điện tử MoMo, ZaloPay, VNPay, thẻ Visa/Mastercard và nạp từ số dư tài khoản NexCloud.",
+    answer:
+      "Chúng tôi hỗ trợ chuyển khoản ngân hàng, ví tài khoản nội bộ và luồng thanh toán thẻ qua Stripe. Một số phương thức thanh toán khác vẫn đang được hoàn thiện theo lộ trình.",
   },
   {
     question: "Tôi có thể dùng thử VPS trước khi mua không?",
-    answer: "Có, gói VPS Starter có 7 ngày dùng thử miễn phí, không cần thẻ tín dụng. Sau thời gian dùng thử, bạn có thể nâng cấp lên gói trả phí hoặc hủy mà không mất phí.",
+    answer:
+      "Có, gói VPS Starter có 7 ngày dùng thử miễn phí. Sau thời gian dùng thử, bạn có thể nâng cấp lên gói trả phí hoặc hủy mà không mất phí.",
   },
   {
     question: "Nếu mã thẻ không hoạt động, tôi cần làm gì?",
-    answer: "Liên hệ ngay với đội hỗ trợ qua live chat hoặc Zalo, chúng tôi sẽ xác minh và cấp lại mã mới hoặc hoàn tiền 100% trong vòng 24 giờ làm việc.",
+    answer:
+      "Liên hệ ngay với đội hỗ trợ qua live chat hoặc Zalo, chúng tôi sẽ xác minh và cấp lại mã mới hoặc hoàn tiền theo chính sách áp dụng.",
   },
   {
     question: "VPS và Cloud Server của NexCloud đặt ở đâu?",
-    answer: "Chúng tôi cung cấp máy chủ tại nhiều vị trí: Hà Nội, TP. Hồ Chí Minh (Việt Nam), Singapore, Tokyo, Frankfurt và Los Angeles. Bạn có thể chọn vị trí phù hợp khi đặt hàng.",
+    answer:
+      "Chúng tôi cung cấp máy chủ tại nhiều vị trí như Hà Nội, TP. Hồ Chí Minh, Singapore, Tokyo, Frankfurt và Los Angeles. Bạn có thể chọn vị trí phù hợp khi đặt hàng.",
   },
   {
     question: "Tôi có thể nâng hoặc hạ cấu hình VPS không?",
-    answer: "Hoàn toàn được. Bạn có thể nâng/hạ cấu hình VPS bất cứ lúc nào từ Dashboard mà không cần cài lại hệ điều hành. Việc nâng cấp thường hoàn tất trong vài phút.",
+    answer:
+      "Hoàn toàn được. Bạn có thể nâng hoặc hạ cấu hình VPS bất cứ lúc nào từ khu vực tài khoản mà không cần cài lại hệ điều hành.",
   },
   {
     question: "NexCloud có hỗ trợ API để tích hợp hệ thống không?",
-    answer: "Có, NexCloud cung cấp REST API đầy đủ cho phép đối tác tích hợp đặt hàng tự động, kiểm tra trạng thái dịch vụ và quản lý tài khoản. Tài liệu API có tại mục Documentation.",
+    answer:
+      "Schema và nền quản trị hiện đã chuẩn bị để mở rộng API theo từng domain sản phẩm. Tài liệu đối tác đầy đủ vẫn đang được hoàn thiện.",
   },
 ]
 
 export function FAQ() {
   return (
-    <section id="faq" className="py-24 lg:py-32 bg-muted/20">
-      <div className="mx-auto max-w-3xl px-6 lg:px-8">
-        <div className="text-center mb-14">
-          <p className="text-sm font-medium text-muted-foreground mb-3">FAQ</p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">
-            Câu hỏi thường gặp
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground text-pretty">
-            Mọi thắc mắc về NexCloud đều được giải đáp tại đây.
-          </p>
-        </div>
-
+    <SectionShell
+      id="faq"
+      description="Các câu hỏi thường gặp được trình bày gọn hơn để giữ nhịp đọc ở cuối landing nhưng vẫn đủ rõ cho người đang chuẩn bị mua."
+      eyebrow="FAQ"
+      title="Câu hỏi thường gặp"
+      tone="violet"
+      contentClassName="mx-auto max-w-4xl"
+    >
+      <PremiumCard className="overflow-hidden p-3 sm:p-4" variant="muted">
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`}>
-              <AccordionTrigger className="text-left text-sm font-medium">
+            <AccordionItem
+              key={faq.question}
+              value={`item-${index}`}
+              className="rounded-2xl border border-transparent px-4 transition-all hover:border-border/80 hover:bg-black/[0.025] dark:hover:border-white/8 dark:hover:bg-white/[0.025] sm:px-5"
+            >
+              <AccordionTrigger className="text-left text-sm font-medium text-foreground sm:text-base">
                 {faq.question}
               </AccordionTrigger>
-              <AccordionContent className="text-sm text-muted-foreground leading-relaxed">
+              <AccordionContent className="pb-5 text-sm leading-7 text-muted-foreground sm:text-[15px]">
                 {faq.answer}
               </AccordionContent>
             </AccordionItem>
           ))}
         </Accordion>
-      </div>
-    </section>
+      </PremiumCard>
+    </SectionShell>
   )
 }

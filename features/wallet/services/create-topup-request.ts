@@ -11,11 +11,12 @@ import {
   type CreateTopupRequestInput,
 } from "@/features/wallet/validations"
 import { getTopupPaymentPlan } from "@/features/payment/services/prepare-payment"
-import type { PaymentIntentStatus } from "@/features/payment/types"
+import type { PaymentIntentStatus, TopupChannelCode } from "@/features/payment/types"
 import {
   mapPaymentMethodCodeToPrisma,
   mapPaymentProviderCodeToPrisma,
 } from "@/features/payment/utils"
+import { getTopupChannelLabel } from "@/features/payment/services/sepay-topup"
 
 export class WalletTopupError extends Error {
   constructor(
@@ -36,6 +37,7 @@ export interface CreatedTopupRequest {
   amount: number
   currency: string
   paymentMethod: "bank_transfer" | "manual_confirmation"
+  paymentChannel: TopupChannelCode
   paymentProvider: "manual_bank_transfer" | "manual_review"
   paymentStatus: PaymentIntentStatus
   instructions: {
@@ -84,7 +86,11 @@ export async function createTopupRequest(userId: string, rawInput: CreateTopupRe
       }
 
       const reference = createTopupReference()
-      const paymentPlan = getTopupPaymentPlan(payload.paymentMethod, reference)
+      const paymentPlan = getTopupPaymentPlan(
+        payload.paymentMethod,
+        reference,
+        payload.paymentChannel
+      )
 
       const transaction = await tx.transaction.create({
         data: {
@@ -100,6 +106,8 @@ export async function createTopupRequest(userId: string, rawInput: CreateTopupRe
           reference,
           metadata: {
             note: payload.note || null,
+            paymentChannel: payload.paymentChannel,
+            paymentChannelLabel: getTopupChannelLabel(paymentPlan.channel),
           },
         },
         select: {
@@ -114,6 +122,7 @@ export async function createTopupRequest(userId: string, rawInput: CreateTopupRe
         amount: payload.amount,
         currency: wallet.currency,
         paymentMethod: payload.paymentMethod,
+        paymentChannel: paymentPlan.channel,
         paymentProvider: paymentPlan.provider,
         paymentStatus: paymentPlan.paymentStatus,
         instructions: paymentPlan.instructions,

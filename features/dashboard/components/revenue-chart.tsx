@@ -2,13 +2,14 @@
 
 import { useId } from "react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { PremiumCard } from "@/features/dashboard/components/premium-card"
+import { SectionHeader } from "@/features/dashboard/components/section-header"
 import { useHydrated } from "@/hooks/use-hydrated"
 
 const chartData = [
@@ -48,12 +49,14 @@ export function RevenueChart() {
   const chartId = useId().replace(/:/g, "")
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Revenue Overview</CardTitle>
-        <CardDescription>Monthly revenue and profit trends for 2024</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <PremiumCard className="p-6" variant="muted">
+      <SectionHeader
+        description="Xu hướng doanh thu và lợi nhuận theo tháng với accent depth nhẹ, dễ đọc hơn trên nền dark."
+        eyebrow="Trend signal"
+        title="Revenue Overview"
+        titleClassName="text-xl sm:text-2xl"
+      />
+      <div className="mt-6">
         {!mounted ? (
           <div className="h-[300px] w-full animate-pulse rounded-md bg-muted" />
         ) : (
@@ -144,7 +147,7 @@ export function RevenueChart() {
           </AreaChart>
         </ChartContainer>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </PremiumCard>
   )
 }

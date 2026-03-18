@@ -28,7 +28,8 @@ const footerLinks = {
 
 export function PublicFooter() {
   return (
-    <footer className="border-t border-border bg-muted/10">
+    <footer className="landing-footer-shell relative overflow-hidden border-t border-border/70 dark:border-white/8">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-sky-500/10 via-cyan-400/6 to-violet-500/10" />
       <div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-6">
           <div className="lg:col-span-2">
@@ -50,10 +51,17 @@ export function PublicFooter() {
                 <MessageCircle className="size-5" />
               </Link>
             </div>
-            <div className="mt-6 rounded-lg border border-border bg-card p-4">
-              <p className="text-xs text-muted-foreground">Hotline hỗ trợ</p>
-              <p className="mt-1 text-sm font-semibold">1800 xxxx (Miễn phí)</p>
-              <p className="mt-0.5 text-xs text-muted-foreground">8:00 – 22:00 tất cả các ngày</p>
+            <div className="premium-card premium-card-muted mt-6 p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.16em] text-muted-foreground">Hotline hỗ trợ</p>
+                  <p className="mt-2 text-sm font-semibold">1800 xxxx (Miễn phí)</p>
+                  <p className="mt-1 text-xs text-muted-foreground">8:00 – 22:00 tất cả các ngày</p>
+                </div>
+                <span className="premium-chip px-2.5 py-1 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-sky-700 dark:text-sky-200">
+                  24/7 care
+                </span>
+              </div>
             </div>
           </div>
 

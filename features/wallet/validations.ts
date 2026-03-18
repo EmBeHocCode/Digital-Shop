@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { topupPaymentMethodCodes } from "@/features/payment/types"
+import { topupChannelCodes, topupPaymentMethodCodes } from "@/features/payment/types"
 
 export const createTopupRequestSchema = z.object({
   amount: z
@@ -8,6 +8,7 @@ export const createTopupRequestSchema = z.object({
     .min(10000, "Số tiền nạp tối thiểu là 10.000đ.")
     .max(50000000, "Số tiền nạp tối đa là 50.000.000đ."),
   paymentMethod: z.enum(topupPaymentMethodCodes),
+  paymentChannel: z.enum(topupChannelCodes).default("manual_bank_transfer"),
   note: z
     .string()
     .trim()

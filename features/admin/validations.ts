@@ -47,6 +47,11 @@ export const adminWalletAdjustmentSchema = z.object({
   description: z.string().trim().min(8).max(200),
 })
 
+export const adminWalletTransactionReviewSchema = z.object({
+  action: z.enum(["approve", "reject", "cancel"]),
+  note: z.string().trim().max(500).optional(),
+})
+
 const productBaseSchema = z.object({
   name: z.string().trim().min(3).max(120),
   slug: z
@@ -79,5 +84,6 @@ export const adminUpdateProductSchema = productBaseSchema.partial().refine(
 export type AdminOrderActionInput = z.infer<typeof adminOrderActionSchema>
 export type AdminUserUpdateInput = z.infer<typeof adminUserUpdateSchema>
 export type AdminWalletAdjustmentInput = z.infer<typeof adminWalletAdjustmentSchema>
+export type AdminWalletTransactionReviewInput = z.infer<typeof adminWalletTransactionReviewSchema>
 export type AdminCreateProductInput = z.infer<typeof adminCreateProductSchema>
 export type AdminUpdateProductInput = z.infer<typeof adminUpdateProductSchema>

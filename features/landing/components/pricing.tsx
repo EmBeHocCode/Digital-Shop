@@ -4,6 +4,8 @@ import { useState } from "react"
 import { Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { PremiumCard } from "@/features/dashboard/components/premium-card"
+import { SectionShell } from "@/features/landing/components/section-shell"
 
 const vpsPlans = [
   {
@@ -60,109 +62,103 @@ export function Pricing() {
   const [annual, setAnnual] = useState(false)
 
   return (
-    <section id="pricing" className="py-24 lg:py-32 bg-muted/20">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm font-medium text-muted-foreground mb-3">Bảng giá</p>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-balance">
-            Giá minh bạch, không phí ẩn
-          </h2>
-          <p className="mt-4 text-lg text-muted-foreground text-pretty">
-            Thanh toán theo tháng hoặc năm. Tiết kiệm thêm 20% với gói năm.
-          </p>
-
-          {/* Billing toggle */}
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <span className={cn("text-sm", !annual ? "text-foreground font-medium" : "text-muted-foreground")}>
-              Hàng tháng
-            </span>
-            <button
-              onClick={() => setAnnual(!annual)}
-              className={cn(
-                "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none",
-                annual ? "bg-foreground" : "bg-muted border border-border"
-              )}
-            >
-              <span
-                className={cn(
-                  "inline-block size-4 transform rounded-full bg-background transition-transform",
-                  annual ? "translate-x-6" : "translate-x-1"
-                )}
-              />
-            </button>
-            <span className={cn("text-sm flex items-center gap-2", annual ? "text-foreground font-medium" : "text-muted-foreground")}>
-              Hàng năm
-              <span className="rounded-full bg-foreground px-2 py-0.5 text-xs text-background font-medium">
-                -20%
-              </span>
-            </span>
-          </div>
-        </div>
-
-        <div className="mt-14 grid gap-6 lg:grid-cols-3">
-          {vpsPlans.map((plan) => (
-            <div
-              key={plan.name}
-              className={cn(
-                "relative flex flex-col rounded-xl border p-7",
-                plan.highlighted
-                  ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card"
-              )}
-            >
-              {plan.highlighted && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-                  <span className="rounded-full bg-background text-foreground border border-border px-4 py-1 text-xs font-semibold">
-                    Phổ biến nhất
-                  </span>
-                </div>
-              )}
-
-              <div>
-                <h3 className="text-base font-semibold">{plan.name}</h3>
-                <p className={cn("mt-1 text-sm", plan.highlighted ? "text-background/70" : "text-muted-foreground")}>
-                  {plan.description}
-                </p>
-              </div>
-
-              <div className="mt-6">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-bold">
-                    {annual ? plan.yearlyPrice : plan.monthlyPrice}
-                  </span>
-                  <span className={cn("text-sm", plan.highlighted ? "text-background/60" : "text-muted-foreground")}>
-                    /tháng
-                  </span>
-                </div>
-                <p className={cn("mt-1.5 text-xs font-mono", plan.highlighted ? "text-background/60" : "text-muted-foreground")}>
-                  {plan.specs}
-                </p>
-              </div>
-
-              <ul className="mt-7 space-y-3 flex-grow">
-                {plan.features.map((feature) => (
-                  <li key={feature} className="flex items-start gap-2.5">
-                    <Check className={cn("size-4 shrink-0 mt-0.5", plan.highlighted ? "text-background" : "text-foreground")} />
-                    <span className={cn("text-sm", plan.highlighted ? "text-background/90" : "text-muted-foreground")}>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                className={cn(
-                  "mt-8 w-full",
-                  plan.highlighted
-                    ? "bg-background text-foreground hover:bg-background/90"
-                    : ""
-                )}
-                variant={plan.highlighted ? "default" : "outline"}
-              >
-                {plan.cta}
-              </Button>
-            </div>
-          ))}
+    <SectionShell
+      id="pricing"
+      description="Thanh toán theo tháng hoặc năm, cùng các mốc cấu hình rõ ràng để khách hàng đánh giá chi phí nhanh hơn."
+      eyebrow="Pricing"
+      title="Giá minh bạch, không phí ẩn"
+      tone="violet"
+    >
+      <div className="flex justify-center">
+        <div className="premium-chip inline-flex items-center gap-4 p-2">
+          <button
+            type="button"
+            onClick={() => setAnnual(false)}
+            className={cn(
+              "rounded-full px-4 py-2 text-sm font-medium transition-all",
+              !annual
+                ? "bg-foreground text-background shadow-[0_14px_28px_-20px_rgba(56,189,248,0.45)]"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Hàng tháng
+          </button>
+          <button
+            type="button"
+            onClick={() => setAnnual(true)}
+            className={cn(
+              "rounded-full px-4 py-2 text-sm font-medium transition-all",
+              annual
+                ? "bg-foreground text-background shadow-[0_14px_28px_-20px_rgba(56,189,248,0.45)]"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Hàng năm
+          </button>
+          <span className="premium-chip px-3 py-1 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-emerald-700 dark:text-emerald-200">
+            -20%
+          </span>
         </div>
       </div>
-    </section>
+
+      <div className="mt-10 grid gap-6 lg:grid-cols-3">
+        {vpsPlans.map((plan) => (
+          <PremiumCard
+            key={plan.name}
+            className="relative flex h-full flex-col p-7"
+            interactive
+            variant={plan.highlighted ? "hero" : "default"}
+          >
+            {plan.highlighted ? (
+              <div className="absolute left-6 top-6">
+                <span className="premium-chip px-3 py-1 text-[0.68rem] font-medium uppercase tracking-[0.16em] text-sky-700 dark:text-sky-200">
+                  Phổ biến nhất
+                </span>
+              </div>
+            ) : null}
+
+            <div className={cn(plan.highlighted && "pt-10")}>
+              <h3 className="text-lg font-semibold tracking-tight text-foreground">{plan.name}</h3>
+              <p className="mt-2 text-sm leading-7 text-muted-foreground">{plan.description}</p>
+            </div>
+
+            <div className="mt-8 border-t border-border/70 pt-6 dark:border-white/6">
+              <div className="flex items-baseline gap-2">
+                <span className="text-4xl font-semibold tracking-tight text-foreground">
+                  {annual ? plan.yearlyPrice : plan.monthlyPrice}
+                </span>
+                <span className="text-sm text-muted-foreground">/tháng</span>
+              </div>
+              <p className="mt-3 text-xs uppercase tracking-[0.16em] text-muted-foreground/85">
+                {plan.specs}
+              </p>
+            </div>
+
+            <ul className="mt-8 space-y-3">
+              {plan.features.map((feature) => (
+                <li key={feature} className="flex items-start gap-3 text-sm text-muted-foreground">
+                  <div className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-emerald-500/18 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300">
+                    <Check className="size-3.5" />
+                  </div>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              className={cn(
+                "mt-8 rounded-2xl transition-all hover:-translate-y-0.5",
+                plan.highlighted
+                  ? "border border-sky-400/18 bg-foreground text-background shadow-[0_22px_40px_-26px_rgba(56,189,248,0.45)] hover:bg-foreground/92 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/92"
+                  : "border-border/70 bg-background/82 hover:border-violet-400/24 hover:bg-violet-500/8 dark:border-white/10 dark:bg-white/[0.03]"
+              )}
+              variant={plan.highlighted ? "default" : "outline"}
+            >
+              {plan.cta}
+            </Button>
+          </PremiumCard>
+        ))}
+      </div>
+    </SectionShell>
   )
 }

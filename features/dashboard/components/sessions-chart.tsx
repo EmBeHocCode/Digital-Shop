@@ -2,13 +2,14 @@
 
 import { useId } from "react"
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
+import { PremiumCard } from "@/features/dashboard/components/premium-card"
+import { SectionHeader } from "@/features/dashboard/components/section-header"
 import { useHydrated } from "@/hooks/use-hydrated"
 
 const chartData = [
@@ -43,12 +44,14 @@ export function SessionsChart() {
   const chartId = useId().replace(/:/g, "")
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Weekly Activity</CardTitle>
-        <CardDescription>Sessions and unique users this week</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <PremiumCard className="p-6" variant="muted">
+      <SectionHeader
+        description="Nhịp truy cập tuần hiện tại với cách trình bày gọn, sáng hơn và ít cảm giác thành một khối đen."
+        eyebrow="Activity pulse"
+        title="Weekly Activity"
+        titleClassName="text-xl sm:text-2xl"
+      />
+      <div className="mt-6">
         {!mounted ? (
           <div className="h-[300px] w-full animate-pulse rounded-md bg-muted" />
         ) : (
@@ -122,7 +125,7 @@ export function SessionsChart() {
           </BarChart>
         </ChartContainer>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </PremiumCard>
   )
 }

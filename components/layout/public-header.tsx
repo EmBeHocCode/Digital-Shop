@@ -38,7 +38,9 @@ export function PublicHeader() {
   return (
     <header
       className={`fixed inset-x-0 top-0 z-50 transition-all duration-300 ${
-        scrolled ? "bg-background/90 border-b border-border/60 backdrop-blur-xl" : "bg-transparent"
+        scrolled
+          ? "landing-nav-shell border-b"
+          : "bg-transparent"
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8">
@@ -48,7 +50,12 @@ export function PublicHeader() {
 
         <div className="flex items-center gap-2 lg:hidden">
           <ThemeToggle />
-          <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(true)}>
+          <Button
+            className="border border-border/70 bg-background/82 transition-all hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/10 dark:bg-white/[0.03]"
+            variant="ghost"
+            size="icon"
+            onClick={() => setMobileMenuOpen(true)}
+          >
             <Menu className="size-5" />
             <span className="sr-only">Mở menu</span>
           </Button>
@@ -60,7 +67,7 @@ export function PublicHeader() {
               key={item.name}
               href={item.href}
               prefetch={item.href === "/services" ? false : undefined}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="landing-nav-link text-sm"
             >
               {item.name}
             </Link>
@@ -73,7 +80,12 @@ export function PublicHeader() {
           {isAuthenticated ? (
             <>
               {canOpenProfile ? (
-                <Button variant="ghost" size="sm" asChild>
+                <Button
+                  className="border border-border/70 bg-background/82 shadow-[0_14px_36px_-28px_rgba(56,189,248,0.16)] transition-all hover:-translate-y-0.5 hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/8 dark:bg-white/[0.03] dark:shadow-[0_14px_36px_-28px_rgba(56,189,248,0.28)]"
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                >
                   <Link href="/dashboard/profile">
                     <UserRound className="size-4" />
                     Tài khoản
@@ -81,24 +93,43 @@ export function PublicHeader() {
                 </Button>
               ) : null}
               {canOpenDashboard ? (
-                <Button variant="ghost" size="sm" asChild>
+                <Button
+                  className="border border-border/70 bg-background/82 transition-all hover:-translate-y-0.5 hover:border-cyan-400/24 hover:bg-cyan-500/8 dark:border-white/8 dark:bg-white/[0.03]"
+                  variant="ghost"
+                  size="sm"
+                  asChild
+                >
                   <Link href="/dashboard">
                     <LayoutDashboard className="size-4" />
                     Dashboard
                   </Link>
                 </Button>
               ) : null}
-              <Button onClick={handleSignOut} size="sm" variant="outline">
+              <Button
+                className="border-border/70 bg-background/90 shadow-[0_18px_38px_-30px_rgba(56,189,248,0.14)] transition-all hover:-translate-y-0.5 hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/10 dark:bg-background/72 dark:shadow-[0_18px_38px_-30px_rgba(56,189,248,0.28)]"
+                onClick={handleSignOut}
+                size="sm"
+                variant="outline"
+              >
                 <LogOut className="size-4" />
                 Đăng xuất
               </Button>
             </>
           ) : (
             <>
-              <Button variant="ghost" size="sm" asChild>
+              <Button
+                className="border border-border/70 bg-background/82 transition-all hover:-translate-y-0.5 hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/8 dark:bg-white/[0.03]"
+                variant="ghost"
+                size="sm"
+                asChild
+              >
                 <Link href="/login">Đăng nhập</Link>
               </Button>
-              <Button size="sm" asChild>
+              <Button
+                className="shadow-[0_18px_36px_-24px_rgba(56,189,248,0.46)] transition-all hover:-translate-y-0.5"
+                size="sm"
+                asChild
+              >
                 <Link href="/register">Đăng ký</Link>
               </Button>
             </>
@@ -112,10 +143,15 @@ export function PublicHeader() {
             className="fixed inset-0 bg-background/60 backdrop-blur-sm"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="fixed inset-y-0 right-0 w-full max-w-sm border-l border-border bg-background p-6 shadow-xl">
+          <div className="landing-nav-shell fixed inset-y-0 right-0 w-full max-w-sm border-l p-6 shadow-xl">
             <div className="flex items-center justify-between">
               <AppLogo href="/" />
-              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+              <Button
+                className="border border-border/70 bg-background/82 transition-all hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/10 dark:bg-white/[0.03]"
+                variant="ghost"
+                size="icon"
+                onClick={() => setMobileMenuOpen(false)}
+              >
                 <X className="size-5" />
                 <span className="sr-only">Đóng menu</span>
               </Button>
@@ -127,7 +163,7 @@ export function PublicHeader() {
                   key={item.name}
                   href={item.href}
                   prefetch={item.href === "/services" ? false : undefined}
-                  className="block rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                  className="block rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-black/[0.03] hover:text-foreground dark:hover:bg-white/[0.04]"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.name}
@@ -140,7 +176,11 @@ export function PublicHeader() {
               {isAuthenticated ? (
                 <>
                   {canOpenProfile ? (
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full border-border/70 bg-background/82 hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/10 dark:bg-white/[0.03]"
+                      asChild
+                    >
                       <Link href="/dashboard/profile" onClick={() => setMobileMenuOpen(false)}>
                         <UserRound className="size-4" />
                         Tài khoản
@@ -148,7 +188,11 @@ export function PublicHeader() {
                     </Button>
                   ) : null}
                   {canOpenDashboard ? (
-                    <Button variant="outline" className="w-full" asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full border-border/70 bg-background/82 hover:border-cyan-400/24 hover:bg-cyan-500/8 dark:border-white/10 dark:bg-white/[0.03]"
+                      asChild
+                    >
                       <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                         Dashboard
                       </Link>
@@ -167,12 +211,16 @@ export function PublicHeader() {
                 </>
               ) : (
                 <>
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full border-border/70 bg-background/82 hover:border-sky-400/24 hover:bg-sky-500/8 dark:border-white/10 dark:bg-white/[0.03]"
+                    asChild
+                  >
                     <Link href="/login" onClick={() => setMobileMenuOpen(false)}>
                       Đăng nhập
                     </Link>
                   </Button>
-                  <Button className="w-full" asChild>
+                  <Button className="w-full shadow-[0_18px_36px_-24px_rgba(56,189,248,0.46)]" asChild>
                     <Link href="/register" onClick={() => setMobileMenuOpen(false)}>
                       Đăng ký miễn phí
                     </Link>

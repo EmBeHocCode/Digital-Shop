@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { InfoPanel } from "@/features/dashboard/components/info-panel"
 
 interface DetailMetadataItem {
   label: string
@@ -20,17 +20,13 @@ export function DetailMetadataCard({
   items,
 }: DetailMetadataCardProps) {
   return (
-    <Card className="border-border/80 bg-card/95">
-      <CardHeader>
-        <CardTitle>{title}</CardTitle>
-        {description ? <CardDescription>{description}</CardDescription> : null}
-      </CardHeader>
-      <CardContent className="grid gap-3 sm:grid-cols-2">
+    <InfoPanel description={description} title={title}>
+      <div className="grid gap-3 sm:grid-cols-2">
         {items.map((item) => (
           <div
             key={`${title}-${item.label}`}
             className={cn(
-              "rounded-2xl border border-border/70 bg-muted/20 p-4",
+              "premium-data-item p-4",
               item.fullWidth && "sm:col-span-2"
             )}
           >
@@ -42,7 +38,7 @@ export function DetailMetadataCard({
             </div>
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </InfoPanel>
   )
 }

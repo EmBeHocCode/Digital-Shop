@@ -1,10 +1,11 @@
-import { CreditCard, Info, Wallet } from "lucide-react"
+import { CreditCard, Info, Landmark, QrCode, Wallet } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type {
   CheckoutPaymentOption,
   PaymentMethodCode,
   PaymentProviderCode,
   PaymentIntentStatus,
+  TopupChannelOption,
   TopupPaymentOption,
 } from "@/features/payment/types"
 
@@ -47,6 +48,24 @@ export const topupPaymentOptions: Array<
   (option): option is TopupPaymentOption & { icon: LucideIcon } =>
     option.value !== "wallet" && option.value !== "card"
 )
+
+export const topupChannelOptions: Array<
+  TopupChannelOption & { icon: LucideIcon }
+> = [
+  {
+    value: "manual_bank_transfer",
+    title: "Chuyển khoản thường",
+    description: "Tạo yêu cầu nạp rồi đối soát thủ công theo mã tham chiếu.",
+    icon: Landmark,
+  },
+  {
+    value: "sepay_qr",
+    title: "SePay QR",
+    description: "Tạo sẵn channel để sau này nối QR và webhook SePay mà không đổi UX nạp số dư.",
+    badge: "Foundation",
+    icon: QrCode,
+  },
+]
 
 export const paymentProviderLabels: Record<PaymentProviderCode, string> = {
   internal_wallet: "Ví nội bộ",

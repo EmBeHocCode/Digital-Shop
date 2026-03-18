@@ -1,18 +1,5 @@
 import { z } from "zod"
 
-const checkboxTrueSchema = z.preprocess((value) => {
-  if (typeof value === "boolean") {
-    return value
-  }
-
-  if (typeof value === "string") {
-    const normalizedValue = value.trim().toLowerCase()
-    return normalizedValue === "true" || normalizedValue === "1" || normalizedValue === "on"
-  }
-
-  return false
-}, z.boolean())
-
 const authCredentialsSchema = z.object({
   email: z.string().trim().toLowerCase().email("Email không hợp lệ."),
   password: z
@@ -22,11 +9,6 @@ const authCredentialsSchema = z.object({
 })
 
 export const signInSchema = authCredentialsSchema.extend({
-  humanCheck: checkboxTrueSchema.refine((value) => value, {
-    message: "Vui lòng xác nhận bạn không phải robot.",
-  }),
-  humanAnswer: z.string().trim().min(1, "Vui lòng nhập kết quả xác thực."),
-  humanToken: z.string().trim().min(1, "Mã xác thực không hợp lệ."),
   website: z.string().trim().max(0, "Yêu cầu không hợp lệ.").optional().or(z.literal("")),
 })
 

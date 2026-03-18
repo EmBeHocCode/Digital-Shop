@@ -38,8 +38,8 @@ export function DashboardSidebar() {
   const groupOrder = ["Workspace", "Commerce", "Admin"] as const
 
   return (
-    <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b border-sidebar-border">
+    <Sidebar className="dashboard-sidebar-shell" collapsible="icon">
+      <SidebarHeader className="border-b border-border/70 dark:border-white/6">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
@@ -49,7 +49,7 @@ export function DashboardSidebar() {
                   subtitle="Marketplace"
                   subtitleClassName="text-muted-foreground"
                   title="NexCloud"
-                  titleClassName="text-sm font-semibold"
+                  titleClassName="text-sm font-semibold text-foreground"
                 />
               </Link>
             </SidebarMenuButton>
@@ -95,13 +95,13 @@ export function DashboardSidebar() {
         })}
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
+      <SidebarFooter className="border-t border-border/70 dark:border-white/6">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg">
               <Link href={dashboardPages.profile.href}>
                 <Avatar className="size-8 rounded-lg">
-                  <AvatarImage src="/placeholder-user.jpg" alt={userName} />
+                  <AvatarImage src={session?.user?.image ?? "/placeholder-user.jpg"} alt={userName} />
                   <AvatarFallback className="rounded-lg bg-foreground/10 text-foreground">
                     {userInitials || "NU"}
                   </AvatarFallback>

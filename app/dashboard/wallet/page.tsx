@@ -152,7 +152,8 @@ export default async function DashboardWalletPage() {
             <CardContent className="space-y-3 text-sm text-muted-foreground">
               <p>- Nạp ví hiện tạo transaction pending, chưa cộng tiền ngay vào số dư.</p>
               <p>- Thanh toán qua ví sẽ dùng Prisma transaction để tạo order và trừ số dư atomically.</p>
-              <p>- Bank transfer và manual confirmation đã sẵn sàng để nối Stripe hoặc VNPay sau này.</p>
+              <p>- Billing hiện đã có thêm điểm vào nạp số dư trực tiếp và channel SePay QR dạng foundation.</p>
+              <p>- SePay callback/reconciliation chưa bật, nhưng metadata và instruction flow đã sẵn sàng để nối sau.</p>
             </CardContent>
           </Card>
         </div>

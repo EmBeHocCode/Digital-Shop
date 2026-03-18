@@ -3,7 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { verifyPassword } from "@/lib/auth/password"
 import { getPrismaClient } from "@/lib/db/prisma"
 import { signInSchema } from "@/features/auth/validations"
-import { verifyHumanVerification } from "@/lib/auth/human-verification"
 
 type SessionRole = "CUSTOMER" | "STAFF" | "MANAGER" | "ADMIN" | "SUPERADMIN"
 
@@ -24,18 +23,6 @@ export const authOptions: NextAuthOptions = {
           label: "Password",
           type: "password",
         },
-        humanCheck: {
-          label: "Human check",
-          type: "text",
-        },
-        humanAnswer: {
-          label: "Human answer",
-          type: "text",
-        },
-        humanToken: {
-          label: "Human token",
-          type: "text",
-        },
         website: {
           label: "Website",
           type: "text",
@@ -48,14 +35,7 @@ export const authOptions: NextAuthOptions = {
           return null
         }
 
-        const isHumanVerified = verifyHumanVerification({
-          answer: parsedCredentials.data.humanAnswer,
-          confirmed: parsedCredentials.data.humanCheck,
-          honeypot: parsedCredentials.data.website,
-          token: parsedCredentials.data.humanToken,
-        })
-
-        if (!isHumanVerified) {
+        if (parsedCredentials.data.website?.trim()) {
           return null
         }
 
@@ -86,7 +66,11 @@ export const authOptions: NextAuthOptions = {
             throw new Error("ACCOUNT_INACTIVE")
           }
 
-          if (!user.emailVerified) {
+          const isLocalDevelopmentBypass =
+            process.env.NODE_ENV === "development" &&
+            (user.email.endsWith(".local") || user.email.endsWith("@nexcloud.local"))
+
+          if (!user.emailVerified && !isLocalDevelopmentBypass) {
             throw new Error("EMAIL_NOT_VERIFIED")
           }
 
@@ -108,11 +92,32 @@ export const authOptions: NextAuthOptions = {
             role: user.role as SessionRole,
           }
         } catch (error) {
+          const prismaError =
+            typeof error === "object" &&
+            error !== null &&
+            "code" in error &&
+            typeof (error as { code?: unknown }).code === "string"
+              ? (error as { code: string }).code
+              : null
+
           if (
             error instanceof Error &&
-            (error.message === "EMAIL_NOT_VERIFIED" || error.message === "ACCOUNT_INACTIVE")
+            (
+              error.message === "EMAIL_NOT_VERIFIED" ||
+              error.message === "ACCOUNT_INACTIVE" ||
+              error.message === "DATABASE_UNAVAILABLE"
+            )
           ) {
             throw error
+          }
+
+          if (
+            prismaError === "ECONNREFUSED" ||
+            prismaError === "P1001" ||
+            prismaError === "ETIMEDOUT" ||
+            prismaError === "ECONNRESET"
+          ) {
+            throw new Error("DATABASE_UNAVAILABLE")
           }
 
           if (process.env.NODE_ENV === "development") {
@@ -135,7 +140,12 @@ export const authOptions: NextAuthOptions = {
       }
 
       if (trigger === "update") {
-        const nextSession = session as { name?: string | null; email?: string | null; phone?: string | null } | undefined
+        const nextSession = session as {
+          name?: string | null
+          email?: string | null
+          image?: string | null
+          phone?: string | null
+        } | undefined
 
         if (typeof nextSession?.name === "string") {
           token.name = nextSession.name
@@ -143,6 +153,10 @@ export const authOptions: NextAuthOptions = {
 
         if (typeof nextSession?.email === "string") {
           token.email = nextSession.email
+        }
+
+        if (nextSession && "image" in nextSession) {
+          token.picture = nextSession.image ?? null
         }
 
         if (nextSession && "phone" in nextSession) {
